@@ -1,6 +1,5 @@
 #
 #  Makefile
-#  $Id: Makefile.in,v 1.4 2003/01/06 08:09:39 bulkstream Exp $
 #
 
 SHELL	= /bin/sh

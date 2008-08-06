@@ -1,6 +1,5 @@
 #
 #  Changes
-#  $Id: Changes,v 1.10 2003/04/13 21:13:24 bulkstream Exp $
 #
 0.5.0 (2008/08/06)
   + final transition from srelay -> xsrelay to zrelay

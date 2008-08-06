@@ -1,5 +1,4 @@
 dnl Process this file with autoconf to produce a configure script.
-dnl $Id: configure.in,v 1.6 2003/04/14 05:36:15 bulkstream Exp $
 AC_INIT(main.c)
 AC_CONFIG_HEADER(config.h)
 AC_CANONICAL_TARGET
