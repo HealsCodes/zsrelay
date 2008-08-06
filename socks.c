@@ -20,8 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-*/
-
 #include "zsrelay.h"
 
 #define S5REQ_CONN    1

@@ -1953,15 +1953,51 @@ test -n "$target_alias" &&
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
 
-case "$build_os" in
-  freebsd*)
-	OS=FREEBSD
-	cat >>confdefs.h <<\_ACEOF
+{ $as_echo "$as_me:$LINENO: checking For native or cross compile" >&5
+$as_echo_n "checking For native or cross compile... " >&6; }
+
+if test "$build_os" == "$host_os"; then
+	case "$build_os" in
+	  freebsd*)
+		OS=FREEBSD
+		cat >>confdefs.h <<\_ACEOF
 #define FREEBSD 1
 _ACEOF
 
-	;;
-  darwin*)
+		;;
+	  darwin*)
+		OS=FREEBSD
+		cat >>confdefs.h <<\_ACEOF
+#define FREEBSD 1
+_ACEOF
+
+		cat >>confdefs.h <<\_ACEOF
+#define HAVE_NLIST_H 1
+_ACEOF
+
+		;;
+	  solaris*)
+		OS=SOLARIS
+		cat >>confdefs.h <<\_ACEOF
+#define SOLARIS 1
+_ACEOF
+
+		;;
+	  linux*)
+		case "$build_cpu" in
+		  i*86)
+		    OS=LINUX
+		    cat >>confdefs.h <<\_ACEOF
+#define LINUX 1
+_ACEOF
+
+		    ;;
+		esac
+		;;
+	esac
+	{ $as_echo "$as_me:$LINENO: result: native" >&5
+$as_echo "native" >&6; }
+else
 	OS=FREEBSD
 	cat >>confdefs.h <<\_ACEOF
 #define FREEBSD 1
@@ -1971,26 +2007,9 @@ _ACEOF
 #define HAVE_NLIST_H 1
 _ACEOF
 
-	;;
-  solaris*)
-	OS=SOLARIS
-	cat >>confdefs.h <<\_ACEOF
-#define SOLARIS 1
-_ACEOF
-
-	;;
-  linux*)
-	case "$build_cpu" in
-	  i*86)
-	    OS=LINUX
-	    cat >>confdefs.h <<\_ACEOF
-#define LINUX 1
-_ACEOF
-
-	    ;;
-        esac
-	;;
-esac
+	{ $as_echo "$as_me:$LINENO: result: cross compile" >&5
+$as_echo "cross compile" >&6; }
+fi
 
 CFLAGS="$CFLAGS -O2 -Wall"
 LDFLAGS="$LDFLAGS -s"

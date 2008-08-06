@@ -20,8 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-*/
-
 #include <sys/stat.h>
 #include "zsrelay.h"
 #ifdef HAVE_NLIST_H

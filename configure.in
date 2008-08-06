@@ -3,29 +3,40 @@ AC_INIT(main.c)
 AC_CONFIG_HEADER(config.h)
 AC_CANONICAL_TARGET
 
-case "$build_os" in
-  freebsd*)
-	OS=FREEBSD
-	AC_DEFINE(FREEBSD)
-	;;
-  darwin*)
+dnl Check if we're cross compiling
+AC_MSG_CHECKING(For native or cross compile)
+
+if test "$build_os" == "$host_os"; then
+	case "$build_os" in
+	  freebsd*)
+		OS=FREEBSD
+		AC_DEFINE(FREEBSD)
+		;;
+	  darwin*)
+		OS=FREEBSD
+		AC_DEFINE(FREEBSD)
+		AC_DEFINE(HAVE_NLIST_H)
+		;;
+	  solaris*)
+		OS=SOLARIS
+		AC_DEFINE(SOLARIS)
+		;;
+	  linux*)
+		case "$build_cpu" in
+		  i*86)
+		    OS=LINUX
+		    AC_DEFINE(LINUX)
+		    ;;
+		esac
+		;;
+	esac
+	AC_MSG_RESULT(native)
+else
 	OS=FREEBSD
 	AC_DEFINE(FREEBSD)
 	AC_DEFINE(HAVE_NLIST_H)
-	;;
-  solaris*)
-	OS=SOLARIS
-	AC_DEFINE(SOLARIS)
-	;;
-  linux*)
-	case "$build_cpu" in
-	  i*86)
-	    OS=LINUX
-	    AC_DEFINE(LINUX)
-	    ;;
-        esac
-	;;
-esac
+	AC_MSG_RESULT(cross compile)
+fi
 
 CFLAGS="$CFLAGS -O2 -Wall"
 LDFLAGS="$LDFLAGS -s"

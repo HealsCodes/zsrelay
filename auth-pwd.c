@@ -20,8 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-*/
-
 #include "zsrelay.h"
 #if defined(FREEBSD) || defined(LINUX)
 #include <pwd.h>
