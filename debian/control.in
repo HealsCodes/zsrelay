@@ -1,0 +1,12 @@
+Package: org.bitspinn.zsrelay@IPHONE_PKG_SUFFIX@
+Name: zsrelay
+Version: 0.5.0-@IPHONE_ARCH_SUFFIX@4
+Architecture: @IPHONE_OS_ARCH@
+Description: zsrelay is a ported version of srelay.
+ zsrelay is tuned for the iPhone and incorporates a DNS fix
+ suggested by Jay Freeman (saurik) - see http://saurik.com/id/7.
+Homepage: http://bitspinn.org/
+Recommends: org.bitspinn.zsrelay-control
+Maintainer: Rene Koecher (shirk) <shirk@bitspinn.org>
+Author: Rene Koecher (shirk) <shirk@bitspinn.org>
+Section: Networking

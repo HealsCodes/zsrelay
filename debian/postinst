@@ -1,0 +1,17 @@
+#!/bin/bash
+
+chown root:wheel /usr/sbin/zsrelay
+chmod +s /usr/sbin/zsrelay
+
+echo "-------------------------------------------------"
+echo "zsrelay 0.5.0 - testing                          "
+echo "-------------------------------------------------"
+echo ""
+echo "zsrelay should be able to life side by side"
+echo "with xsrelay bit it is suggested to choose one"
+echo "of them and stick with it."
+echo ""
+echo "If you use BossPrefs you may want to install the"
+echo "zrelay control from the System/ category."
+echo ""
+
