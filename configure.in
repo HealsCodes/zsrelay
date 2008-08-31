@@ -55,6 +55,48 @@ GCC=yes
 AC_PROG_CC
 
 
+dnl Check for iPhone cross compile
+AC_ARG_ENABLE(iphone-extras,
+[--enable-iphone-extras		build with iPhone-only features],
+iphoneos="yes",
+iphoneos="no")
+AC_MSG_CHECKING(whether we should enable iPhone specific features)
+
+if test "X$iphoneos" == "Xyes"; then
+	AC_DEFINE(IPHONE_OS)
+	AC_MSG_RESULT([yes])
+
+	dnl export versioning for Cydia
+
+	AC_MSG_CHECKING([which iPhoneOS version to build])
+	case $CC in
+		arm-apple-darwin8-*)
+			AC_SUBST(IPHONE_OS_ARCH, "darwin-arm")
+			AC_SUBST(IPHONE_PKG_SUFFIX)
+			AC_SUBST(IPHONE_ARCH_SUFFIX, "1legacy")
+			AC_DEFINE(IPHONE_OS_RELEASE, 1, [legacy iphone os])
+			AC_MSG_RESULT([iphone legacy (1.1.X)])
+		;;
+
+		arm-apple-darwin9-*)
+			AC_SUBST(IPHONE_OS_ARCH, "iphoneos-arm")
+			AC_SUBST(IPHONE_PKG_SUFFIX)
+			AC_SUBST(IPHONE_ARCH_SUFFIX)
+			AC_DEFINE(IPHONE_OS_RELEASE, 2, [2.x iphone os])
+			AC_MSG_RESULT([iphone os 2.X])
+		;;
+
+		*)
+			AC_MSG_ERROR([
+
+Unsupported build target $host_os.
+--enable-iphone-extras requires arm-apple-darwin8/9 as host or build os.])
+		;;
+	esac
+else
+	AC_MSG_RESULT([no])
+fi
+
 #dnl Checks for libraries.
 
 AC_ARG_WITH(libbind,
@@ -160,7 +202,7 @@ if test "$thread" != "no"; then
 	fi
 
 	if test "$build_os" != "$host_os"; then
-		AC_MSG_RESULT("enabling thread without check (ross compile)")
+		AC_MSG_RESULT([enabling threads without check (cross compile)])
 		AC_DEFINE(USE_THREAD)
 	else
 
@@ -182,6 +224,10 @@ main()
 	)
 	fi
     fi
+else
+	if test "X$iphoneos" == "Xyes"; then
+		AC_MSG_ERROR([pthread support is mandatory when compiling for the iPhone], -1)
+	fi
 fi
 
 AC_CHECK_LIB(crypt, crypt)
@@ -222,20 +268,8 @@ AC_CHECK_FUNCS(\
 		getnameinfo\
 		freeaddrinfo\
 		)
-dnl export versioning
-case $CC in
-	arm-apple-darwin8-*)
-		AC_SUBST(IPHONE_OS_ARCH, "darwin-arm")
-		AC_SUBST(IPHONE_PKG_SUFFIX)
-		AC_SUBST(IPHONE_ARCH_SUFFIX, "1legacy")
-	;;
 
-	arm-apple-darwin9-*)
-		AC_SUBST(IPHONE_OS_ARCH, "iphoneos-arm")
-		AC_SUBST(IPHONE_PKG_SUFFIX)
-		AC_SUBST(IPHONE_ARCH_SUFFIX)
-	;;
-esac
+
 
 AC_OUTPUT(Makefile)
 AC_OUTPUT(debian/control)
@@ -263,4 +297,8 @@ AH_TEMPLATE([HAVE_SOCKADDR_SA_LEN],
 	[Define if `sa_len' is member of `struct sockaddr'.])
 AH_TEMPLATE([HAVE_NLIST_H],
 	[Define if you have <mach-o/nlist.h> and want to disable mDNSResponder.])
+AH_TEMPLATE([IPHONE_OS],
+	[Define if you want to enable iPhone specific features.])
+AH_TEMPLATE([IPHONE_OS_RELEASE],
+	[Define to the appropriate iPhoneOS major version (1/2)])
 
