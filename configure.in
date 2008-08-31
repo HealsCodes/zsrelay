@@ -222,8 +222,23 @@ AC_CHECK_FUNCS(\
 		getnameinfo\
 		freeaddrinfo\
 		)
+dnl export versioning
+case $CC in
+	arm-apple-darwin8-*)
+		AC_SUBST(IPHONE_OS_ARCH, "darwin-arm")
+		AC_SUBST(IPHONE_PKG_SUFFIX)
+		AC_SUBST(IPHONE_ARCH_SUFFIX, "1legacy")
+	;;
+
+	arm-apple-darwin9-*)
+		AC_SUBST(IPHONE_OS_ARCH, "iphoneos-arm")
+		AC_SUBST(IPHONE_PKG_SUFFIX)
+		AC_SUBST(IPHONE_ARCH_SUFFIX)
+	;;
+esac
 
 AC_OUTPUT(Makefile)
+AC_OUTPUT(debian/control)
 
 dnl from acconfig.h
 AH_TEMPLATE([FREEBSD],
