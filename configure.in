@@ -55,7 +55,7 @@ LIBBIND="/usr/local/bind"
 dnl Checks for programs.
 GCC=yes
 AC_PROG_CC
-
+AC_PROG_OBJC
 
 dnl Check for iPhone cross compile
 AC_ARG_ENABLE(iphone-extras,
@@ -64,7 +64,7 @@ iphoneos="yes",
 iphoneos="no")
 AC_MSG_CHECKING(whether we should enable iPhone specific features)
 
-if test "X$iphoneos" == "Xyes"; then
+if test x$iphoneos == xyes; then
 	AC_DEFINE(IPHONE_OS)
 	AC_MSG_RESULT([yes])
 
@@ -95,9 +95,12 @@ Unsupported build target $host_os.
 --enable-iphone-extras requires arm-apple-darwin8/9 as host or build os.])
 		;;
 	esac
+
 else
 	AC_MSG_RESULT([no])
 fi
+
+AM_CONDITIONAL([IPHONE_OS], [test x$iphoneos == xyes])
 
 #dnl Checks for libraries.
 
@@ -227,7 +230,7 @@ main()
 	fi
     fi
 else
-	if test "X$iphoneos" == "Xyes"; then
+	if test x$iphoneos == xyes; then
 		AC_MSG_ERROR([pthread support is mandatory when compiling for the iPhone], -1)
 	fi
 fi
@@ -270,6 +273,11 @@ AC_CHECK_FUNCS(\
 		getnameinfo\
 		freeaddrinfo\
 		)
+
+dnl iPhone 2.X doesn't like binaries without symbols
+if test x$iphoneos = xyes; then
+	LDFLAGS=$(echo $LDFLAGS | sed -e's/-s //g')
+fi
 
 AC_OUTPUT(Makefile src/Makefile debian/control)
 

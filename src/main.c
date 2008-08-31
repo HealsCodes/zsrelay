@@ -23,7 +23,10 @@
 #include <sys/stat.h>
 #include "zsrelay.h"
 #ifdef HAVE_NLIST_H
-#include <mach-o/nlist.h>
+# include <mach-o/nlist.h>
+#endif
+#ifdef IPHONE_OS
+# include "ZSRelayApp.h"
 #endif
 
 /* prototypes */
@@ -363,16 +366,28 @@ int main(int ac, char **av)
         exit(1);
     }
     main_thread = pthread_self();   /* store main thread ID */
+#ifdef IPHONE_OS
+    msg_out(norm, "Preparing switch to iphone app");
+    /* iphone implies threading */
+    if (pthread_create(&tid, &attr, (void*)&serv_loop, (void*)NULL)!=0)
+    {
+	exit(1);
+    }
+    msg_out(norm, "Switching to iphone app");
+    iphone_app_main();
+#else
     for (;;) {
       pause();
     }
-  } else {
 #endif
+  } else {
+#else
     setsignal(SIGCHLD, reapchild);
     setregid(0, PROCGID);
     setreuid(0, PROCUID);
     msg_out(norm, "Starting: MAX_CH(%d)", max_child);
     serv_loop();
+#endif
 #ifdef USE_THREAD
   }
 #endif
