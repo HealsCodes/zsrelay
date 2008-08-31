@@ -12,10 +12,8 @@ iphone_app_main (void)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     ZSRelayApp *app = [[ZSRelayApp alloc] init];
 
-    fprintf(stderr, "Initializing App..\n");
     [app applicationDidFinishLaunching:nil];
 
-    fprintf(stderr, "Entering CFRunLoop..\n");
     while (1)
     {
 	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.25, false);
@@ -28,7 +26,6 @@ iphone_app_main (void)
 
 -(void) applicationDidFinishLaunching:(id)unused
 {
-    NSLog(@"App did finish launching");
 }
 @end
 

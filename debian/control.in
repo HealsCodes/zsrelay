@@ -1,3 +1,8 @@
+Source: org.bitspin.zsrelay@IPHONE_PKG_SUFFIX@
+Section: devel
+Maintainer: Rene Koecher (shirk) <shirk@bitspin.org>
+Standards-Version: 2.1.2.2
+
 Package: org.bitspin.zsrelay@IPHONE_PKG_SUFFIX@
 Name: zsrelay
 Version: 0.5.0-@IPHONE_ARCH_SUFFIX@4

@@ -279,7 +279,7 @@ if test x$iphoneos = xyes; then
 	LDFLAGS=$(echo $LDFLAGS | sed -e's/-s //g')
 fi
 
-AC_OUTPUT(Makefile src/Makefile debian/control)
+AC_OUTPUT(Makefile doc/Makefile src/Makefile debian/control debian/changelog debian/rules)
 
 dnl from acconfig.h
 AH_TEMPLATE([FREEBSD],
