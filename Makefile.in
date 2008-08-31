@@ -12,6 +12,7 @@ sysconfdir = @sysconfdir@
 CC	= @CC@
 CFLAGS	= @CFLAGS@
 CPPFLAGS= @CPPFLAGS@
+OBJCFLAGS = @OBJCFLAGS@
 DEFS	= @DEFS@ -DSYSCONFDIR=\"$(sysconfdir)\"
 LDFLAGS	= @LDFLAGS@
 LIBS	= @LIBS@
@@ -23,6 +24,9 @@ TARGET	= zsrelay
 .c.o:
 	$(CC) -I. $(CPPFLAGS) $(DEFS) $(CFLAGS) -c $<
 
+.m.o:
+	$(CC) -I. $(CPPFLAGS) $(DEFS) $(CFLAGS) $(OBJCFLAGS) -c $<
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -31,10 +35,25 @@ $(TARGET): $(OBJS)
 zsrelay.h: $(INCLUDES)
 	@touch $@
 
+package: $(TARGET)
+	mkdir -p dist/zsrelay/DEBIAN
+	mkdir -p dist/zsrelay/usr/{sbin,share/doc/zsrelay-0.5.0}
+	mkdir -p dist/zsrelay/Library/LaunchDaemons
+	cp zsrelay dist/zsrelay/usr/sbin/
+	cp COPYING zsrelay.passwd zsrelay.conf dist/zsrelay/usr/share/doc/zsrelay-0.5.0/
+	cp org.bitspin.zsrelay.plist dist/zsrelay/Library/LaunchDaemons/
+	cp debian/* dist/zsrelay/DEBIAN/
+	dpkg-deb -b dist/zsrelay zsrelay-0.5.0-@IPHONE_ARCH_SUFFIX@5.deb
+
 clean:
 	rm -f *.o *~  *.core core ktrace.out
 
-distclean: clean
+packageclean:
+	rm -rf dist/
+	rm -rf *.deb
+	rm debian/control
+
+distclean: clean packageclean
 	rm -f $(TARGET)
 	rm -f config.log config.status config.cache Makefile config.h
 	rm -f *.orig *.rej
@@ -45,6 +64,6 @@ readconf.o: readconf.c zsrelay.h
 util.o: util.c zsrelay.h
 socks.o: socks.c zsrelay.h
 relay.o: relay.c zsrelay.h
-main.o: main.c zsrelay.h
+main.o: main.m zsrelay.h
 auth-pwd.o: auth-pwd.c zsrelay.h
 get-bind.o: get-bind.c zsrelay.h

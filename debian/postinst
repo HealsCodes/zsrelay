@@ -1,6 +1,7 @@
 #!/bin/bash
 
 chown root:wheel /usr/sbin/zsrelay
+chown root:wheel /Library/LaunchDaemons/org.bitspin.zsrelay.plist
 chmod +s /usr/sbin/zsrelay
 
 echo "-------------------------------------------------"
