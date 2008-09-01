@@ -98,6 +98,7 @@ int main(int ac, char **av)
 #endif
 
 #ifdef HAVE_NLIST_H
+#if !defined(IPHONE_OS) || IPHONE_OS_RELEASE == 1
   /* disable mDNSResponder */
   struct nlist nl[2];
   memset(nl, 0, sizeof(nl));
@@ -105,6 +106,7 @@ int main(int ac, char **av)
   nlist("/usr/lib/libc.dylib", nl);
   if (nl[0].n_type != N_UNDF)
   *(int*)nl[0].n_value = 0;
+#endif
 #endif
 
   /* try changing working directory */
@@ -350,10 +352,10 @@ int main(int ac, char **av)
     if ( rl.rlim_cur != save_fd )  /* if rlim_cur is changed   */
       if (setrlimit(RLIMIT_NOFILE, &rl) != 0)
         msg_out(warn, "cannot set rlimit(max_fd)");
-
+#ifndef IPHONE_OS
     setregid(0, PROCGID);
     setreuid(0, PROCUID);
-
+#endif
     pthread_mutex_init(&mutex_select, NULL);
     /*    pthread_mutex_init(&mutex_gh0, NULL); */
     pthread_attr_init(&attr);
@@ -392,4 +394,4 @@ int main(int ac, char **av)
   }
 #endif
   return(0);
-}
+
