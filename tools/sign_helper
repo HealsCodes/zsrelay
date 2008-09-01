@@ -1,0 +1,9 @@
+#!/bin/zsh
+BASE=/Users/$(whoami)/Documents/autosign
+FILE=$(basename $1)
+SIGN=$2
+
+scp "$1" $(whoami)@mariko:"$BASE/unsigned"
+ssh $(whoami)@mariko "while [ ! -f "$BASE/signed/$FILE" ]; do sleep 1; done; sleep 2"
+scp $(whoami)@mariko:"$BASE/signed/$FILE" "$2"
+

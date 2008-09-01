@@ -18,7 +18,7 @@ build-stamp:
 
 	# Add here commands to compile the package.
 	dh_testdir
-	$(MAKE)
+	#$(MAKE)
 
 	touch build-stamp
 
@@ -40,17 +40,9 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/<packagename>.
-	echo "Copying package to iphone $(IPHONE_IP)"
-	ssh -o StrictHostKeyChecking=no root@$(IPHONE_IP) rm -f /tmp/zsrelay 2>/dev/null
-	scp -o StrictHostKeyChecking=no src/zsrelay root@$(IPHONE_IP):/tmp/ 2>/dev/null
-	echo "Signing package..."
-	ssh -o StrictHostKeyChecking=no root@$(IPHONE_IP) /usr/bin/ldid -S /tmp/zsrelay 2>/dev/null
-	echo "Receiving package..."
-	scp -o StrictHostKeyChecking=no root@$(IPHONE_IP):/tmp/zsrelay src/zsrelay 2>/dev/null
-	echo "Removing temporary files.."
-	ssh -o StrictHostKeyChecking=no root@$(IPHONE_IP) rm /tmp/zsrelay 2>/dev/null
 	$(MAKE) prefix=$(DEBDESTDIR)/usr install
 	install -d $(DEBDESTDIR)/Library/LaunchDaemons
+	install -m 0755 src/zsrelay.signed $(DEBDESTDIR)/usr/sbin/zsrelay
 	install -m 0755 doc/org.bitspin.zsrelay.plist $(DEBDESTDIR)/Library/LaunchDaemons
 
 # Build architecture-independent files here.
@@ -82,7 +74,7 @@ binary-indep: build install
 #	dh_python
 	dh_installdeb
 #	dh_gencontrol
-	./debian/dpkg-gencontrol -a@IPHONE_OS_ARCH@ -p`dh_listpackages`
+	./tools/dpkg-gencontrol -a@IPHONE_OS_ARCH@ -p`dh_listpackages`
 	dh_md5sums
 	dh_builddeb
 # Build architecture-dependent files here.
