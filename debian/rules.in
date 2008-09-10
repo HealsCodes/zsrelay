@@ -42,8 +42,11 @@ install: build
 	# Add here commands to install the package into debian/<packagename>.
 	$(MAKE) prefix=$(DEBDESTDIR)/usr install
 	install -d $(DEBDESTDIR)/Library/LaunchDaemons
-	install -m 0755 src/zsrelay.signed $(DEBDESTDIR)/usr/sbin/zsrelay
-	install -m 0755 doc/org.bitspin.zsrelay.plist $(DEBDESTDIR)/Library/LaunchDaemons
+	install -d $(DEBDESTDIR)/Library/ZSRelay/ZSRelay.app
+	install -m 0755 src/ZSRelay.app/* $(DEBDESTDIR)/Library/ZSRelay/ZSRelay.app/
+	install -m 0755 misc/org.bitspin.zsrelay.plist $(DEBDESTDIR)/Library/LaunchDaemons
+	install -m 0644 misc/*.png $(DEBDESTDIR)/System/Library/CoreServices/SprinBoard.app/
+	install -m 0755 misc/zswrapper $(DEBDESTDIR)/usr/sbin/zsrelay
 
 # Build architecture-independent files here.
 binary-indep: build install

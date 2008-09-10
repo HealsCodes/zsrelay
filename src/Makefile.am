@@ -1,4 +1,8 @@
+if IPHONE_OS
+sbin_PROGRAMS = zsrelay zscmd
+else
 sbin_PROGRAMS = zsrelay
+endif
 
 DEFS += -DSYSCONFDIR="\"$(sysconfdir)\""
 
@@ -7,7 +11,11 @@ zsrelay_LDADD = @LIBS@
 zsrelay_LDFLAGS = @LDFLAGS@
 
 if IPHONE_OS
-zsrelay_SOURCES += ZSRelayApp.m
-zsrelay_LDFLAGS += -framework CoreFoundation -framework Foundation -framework UIKit -multiply_defined suppress -lobjc -ObjC
+zscmd_SOURCES = zscmd.c
+zscmd_LDADD = @LIBS@
+zscmd_LDFLAGS = @LDFLAGS@ -framework CoreFoundation
+
+zsrelay_SOURCES += ZSRelayApp.m ZSRelayApp+Settings.m ZSRelayApp+IOKit.m ZSRelayApp+Icons.m ZSRelayApp+Notify.m
+zsrelay_LDFLAGS += -framework CoreFoundation -framework Foundation -framework IOKit -framework UIKit -multiply_defined suppress -lobjc -ObjC
 endif
 

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+function zsstart
+{
+	echo "zsrelay wrapper: staring zsrelay"
+	/tmp/ZSRelay.app/zscmd start
+}
+
+
+function zsstop
+{
+	echo "zsrelay wrapper: stopping zsrelay"
+	/tmp/ZSRelay.app/zscmd stop
+	exit $?
+}
+
+trap zsstop SIGINT
+trap zsstop SIGKILL
+trap zsstop SIGTERM
+
+zsstart
+
+while [ $# -ne 0 ]; do
+	if [ "$1" == "-f" ]; then
+		while true; do
+			sleep 1
+		done
+
+		exit 0
+	fi
+
+	shift
+done
+

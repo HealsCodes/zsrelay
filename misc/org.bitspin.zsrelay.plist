@@ -12,7 +12,7 @@
 	<false/>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/usr/sbin/zsrelay</string>
+		<string>/Library/ZSRelay/ZSRelay.app/zsrelay</string>
 		<string>-f</string>
 	</array>
 </dict>

@@ -1,18 +1,24 @@
 #!/bin/bash
 
 chown root:wheel /usr/sbin/zsrelay
+chown root:wheel /usr/sbin/zscmd
 chown root:wheel /Library/LaunchDaemons/org.bitspin.zsrelay.plist
 chmod +s /usr/sbin/zsrelay
+chmod +s /usr/sbin/zscmd
 
-echo "-------------------------------------------------"
-echo "zsrelay 0.5.0 - testing                          "
-echo "-------------------------------------------------"
-echo ""
-echo "zsrelay should be able to life side by side"
-echo "with xsrelay bit it is suggested to choose one"
-echo "of them and stick with it."
-echo ""
-echo "If you use BossPrefs you may want to install the"
-echo "zrelay control from the System/ category."
-echo ""
+echo <<EOS
+-------------------------------------------------
+zsrelay 0.5.0 - beta
+-------------------------------------------------
+
+zsrelay should be able to life side by side
+with xsrelay bit it is suggested to choose one
+of them and stick with it.
+
+If you use BossPrefs you may want to install the
+zrelay control from the System/ category.
+
+If you don't use BossPrefs you can configure zsrelay
+from within Preferences.app.
+EOS
 
