@@ -1,7 +1,7 @@
 /*
    This file is part of zsrelay a srelay port for the iPhone.
 
-   Copyright (C) 2008 Rene Koecher <shirk@bitspinn.org>
+   Copyright (C) 2008 Rene Koecher <shirk@bitspin.org>
 
    Based on srelay 0.4.6 source base Copyright (C) 2001 Tomo.M
    Destributed under the GPL license with original authors permission.
