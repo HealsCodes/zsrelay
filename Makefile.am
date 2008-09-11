@@ -20,7 +20,7 @@ fakesign: distclean-local all
 
 app-bundle: fakesign
 	@mkdir -p src/zsrelay/ZSRelay.app
-	@cp $(srcdir)/misc/Info.plist src/ZSRelay.app/Info.plist
+	@cp $(srcdir)/misc/Info.plist src/zsrelay/ZSRelay.app/Info.plist
 	@cp src/zsrelay/zsrelay src/zsrelay/ZSRelay.app/zsrelay
 
 dist-deb: app-bundle
