@@ -48,19 +48,26 @@
 
 -(void)removeIcon:(NSString*)iconName
 {
+    NSString *fullIconName = iconName;
     if ([self displayStatusIcons] == NO)
     {
 	return;
     }
 
-    [self removeStatusBarImageNamed:iconName];
+    if ([self iPhoneModemSupervisor] == YES)
+    {
+	fullIconName = [iconName stringByReplacingOccurrencesOfString:@"ZSRelay"
+							   withString:@"ZSRelayNOP"];
+    }
+    [self removeStatusBarImageNamed:fullIconName];
 }
 
 -(void)removeAllIcons
 {
     [self removeIcon:@"ZSRelay"];
-    [self removeIcon:@"ZSRelaySuper"];
+    [self removeIcon:@"ZSRelayNOP"];
     [self removeIcon:@"ZSRelayInsomnia"];
+    [self removeIcon:@"ZSRelayNOPInsomnia"];
 }
 @end
 /* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :

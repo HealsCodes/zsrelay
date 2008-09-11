@@ -50,6 +50,8 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 	CFRunLoopAddSource(CFRunLoopGetCurrent(),
 			   IONotificationPortGetRunLoopSource(notificationPort),
 			   kCFRunLoopCommonModes);
+
+	return YES;
     }
     else
     {
@@ -65,7 +67,11 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 	IOServiceClose(root_port);
 	IONotificationPortDestroy(notificationPort);
 	notificationPort = NULL;
+
+	return YES;
     }
+
+    return NO;
 }
 
 - (void)handlePMMessage:(natural_t)type withArgument:(void *) argument

@@ -142,8 +142,6 @@ iphone_app_main (void)
     }
 
     printf("Springboard uid: %i\n", springboard_uid());
-    setuid(springboard_uid());
-    sleep(2);
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     ZSRelayApp *app = [[ZSRelayApp alloc] init];
@@ -252,6 +250,8 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	    NSLog(@"failed to register hook");
 	}
     }
+    setuid(springboard_uid());
+    sleep(2);
 }
 
 -(void)applicationWillTerminate
