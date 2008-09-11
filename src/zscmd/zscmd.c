@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <CoreFoundation/CoreFoundation.h>
 
+static void insertPrefBundle(NSString *settingsFile);
+static void removePrefBundle(NSString *settingsFile);
+
 int
 main (int argc, char **argv)
 {
@@ -46,9 +49,66 @@ main (int argc, char **argv)
 	    notifyCenter = CFNotificationCenterGetDarwinNotifyCenter();
 	    CFNotificationCenterPostNotification(notifyCenter, zsReConfig, NULL, NULL, true);
 	}
+	else if(strncmp("install-plugin", argv[1], 14) == 0)
+	{
+	    insertPrefBundle(@"/Applications/Preferences.app/Settings-iPhone.plist");
+	    insertPrefBundle(@"/Applications/Preferences.app/Settings-iPod.plist");
+	    return 0;
+	}
+	else if(strncmp("remove-plugin", argv[1], 13) == 0)
+	{
+	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPhone.plist");
+	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPod.plist");
+	    return 0;
+	}
     }
-    fprintf(stderr, "usage: %s [start|stop|reconf]\n", argv[0]);
+    fprintf(stderr, "usage: %s [start|stop|reconf|install-plugin|remove-plugin]\n", argv[0]);
     return 1;
+}
+
+/* thanks to scrobbled 2.0 */
+void
+insertPrefBundle(NSString *settingsFile)
+{
+    int i;
+    NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile: settingsFile];
+    for(i = 0; i < [[settings objectForKey:@"items"] count]; i++)
+    {
+	NSDictionary *entry = [[settings objectForKey:@"items"] objectAtIndex: i];
+	if([[entry objectForKey:@"bundle"] isEqualToString:@"ZSRelaySettings"])
+	{
+	    printf("Preferences plugin already installed.\n");
+	    return;
+	}
+    }
+    printf("Registring preferences plugin.\n");
+    [[settings objectForKey:@"items"] insertObject:
+	[NSDictionary dictionaryWithObjectsAndKeys:
+	@"PSLinkCell", @"cell",
+	@"ZSRelaySettings", @"bundle",
+	@"zsrelay", @"label",
+	[NSNumber numberWithInt: 1], @"isController",
+	[NSNumber numberWithInt: 1], @"hasIcon",
+	nil] atIndex: [[settings objectForKey:@"items"] count] - 1];
+    [settings writeToFile:settingsFile atomically:YES];
+}
+
+void
+removePrefBundle(NSString *settingsFile)
+{
+    int i;
+    NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile: settingsFile];
+    for(i = 0; i < [[settings objectForKey:@"items"] count]; i++)
+    {
+	NSDictionary *entry = [[settings objectForKey:@"items"] objectAtIndex: i];
+	if([[entry objectForKey:@"bundle"] isEqualToString:@"ZSRelaySettings"])
+	{
+	    printf("Removing preferences plugin.\n");
+	    [[settings objectForKey:@"items"] removeObjectAtIndex: i];
+	    i--;
+	}
+    }
+    [settings writeToFile:settingsFile atomically:YES];
 }
 
 /* vim: ai ft=c ts=8 sts=4 sw=4 fdm=marker noet :
