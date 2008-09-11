@@ -3,14 +3,14 @@
 function zsstart
 {
 	echo "zsrelay wrapper: staring zsrelay"
-	/tmp/ZSRelay.app/zscmd start
+	/usr/sbin/zscmd start
 }
 
 
 function zsstop
 {
 	echo "zsrelay wrapper: stopping zsrelay"
-	/tmp/ZSRelay.app/zscmd stop
+	/usr/sbin/zscmd stop
 	exit $?
 }
 
