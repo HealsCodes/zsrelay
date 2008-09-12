@@ -10,12 +10,6 @@
 		</dict>
 		<dict>
 			<key>cell</key>
-			<string>PSGroupCell</string>
-			<key>label</key>
-			<string>zsrelay Settings</string>
-		</dict>
-		<dict>
-			<key>cell</key>
 			<string>PSSwitchCell</string>
 			<key>default</key>
 			<false/>
@@ -43,6 +37,8 @@
 			<string>setPrefVal:specifier:</string>
 		</dict>
 		<dict>
+			<key>alternateColors</key>
+			<true/>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
 			<key>default</key>
