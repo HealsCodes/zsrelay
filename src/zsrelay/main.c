@@ -98,7 +98,7 @@ int main(int ac, char **av)
 #endif
 
 #ifdef HAVE_NLIST_H
-#if !defined(IPHONE_OS) || IPHONE_OS_RELEASE == 1
+#if IPHONE_OS_RELEASE == 1 || !defined(IPHONE_OS)
   /* disable mDNSResponder */
   struct nlist nl[2];
   memset(nl, 0, sizeof(nl));

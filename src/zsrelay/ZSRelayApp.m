@@ -221,7 +221,7 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 
     NSLog(@"use status icons: %d", [self displayStatusIcons]);
     [self showIcon:@"ZSRelay"];
-
+#if 0
 #ifdef HAVE_NLIST
     NSLog(@"use mDNSResponder fix: %d", [self patchDNS]);
     if ([self patchDNS] == YES)
@@ -245,6 +245,7 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     }
 #else
     NSLog(@"mDNSResponder fix not compiled in");
+#endif
 #endif
 
     NSLog(@"use network keep alive: %d", [self networkKeepAlive]);

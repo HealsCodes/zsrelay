@@ -33,6 +33,7 @@
     if (prefs == nil)
     {
 	NSLog(@"Storing new user defaults");
+#if 0
 #if IPHONE_OS_RELEASE == 1
 	[[NSUserDefaults standardUserDefaults] setBool:YES
 						forKey:@"patchDNS"];
@@ -40,6 +41,7 @@
 	/* unsupported by default */
 	[[NSUserDefaults standardUserDefaults] setBool:NO
 						forKey:@"patchDNS"];
+#endif
 #endif
 	[[NSUserDefaults standardUserDefaults] setBool:NO
 						forKey:@"networkKeepAlive"];
@@ -69,10 +71,12 @@
     return YES;
 }
 
+#if 0
 -(BOOL)patchDNS
 {
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"patchDNS"];
 }
+#endif
 
 -(BOOL)networkKeepAlive
 {

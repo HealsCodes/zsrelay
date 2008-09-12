@@ -50,7 +50,9 @@ void iphone_app_main(void);
 
 @interface ZSRelayApp (Settings)
 -(BOOL)loadSettings;
+#if 0
 -(BOOL)patchDNS;
+#endif
 -(BOOL)networkKeepAlive;
 -(BOOL)displayStatusIcons;
 /* additions for iPhoneModem support */
