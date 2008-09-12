@@ -78,6 +78,7 @@ if test x$iphoneos == xyes; then
 			AC_SUBST(IPHONE_ARCH_SUFFIX, "1legacy")
 			AC_DEFINE(IPHONE_OS_RELEASE, 1, [legacy iphone os])
 			AC_MSG_RESULT([iphone legacy (1.1.X)])
+			AM_CONDITIONAL([IPHONE_OS_RELEASE2], [false])
 		;;
 
 		arm-apple-darwin9-*)
@@ -86,6 +87,7 @@ if test x$iphoneos == xyes; then
 			AC_SUBST(IPHONE_ARCH_SUFFIX)
 			AC_DEFINE(IPHONE_OS_RELEASE, 2, [2.x iphone os])
 			AC_MSG_RESULT([iphone os 2.X])
+			AM_CONDITIONAL([IPHONE_OS_RELEASE2], [true])
 		;;
 
 		*)
@@ -279,7 +281,7 @@ if test x$iphoneos = xyes; then
 	LDFLAGS=$(echo $LDFLAGS | sed -e's/-s //g')
 fi
 
-AC_OUTPUT(Makefile doc/Makefile src/Makefile src/zsrelay/Makefile src/zscmd/Makefile debian/control debian/changelog debian/rules)
+AC_OUTPUT(Makefile doc/Makefile src/Makefile src/zsrelay/Makefile src/zscmd/Makefile src/prefplug/Makefile debian/control debian/changelog debian/rules)
 
 dnl from acconfig.h
 AH_TEMPLATE([FREEBSD],

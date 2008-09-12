@@ -19,30 +19,34 @@
 
 #include <stdio.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <Foundation/Foundation.h>
 
-static void insertPrefBundle(NSString *settingsFile);
-static void removePrefBundle(NSString *settingsFile);
+static void insertPrefBundle(NSString* settingsFile);
+static void removePrefBundle(NSString* settingsFile);
 
 int
 main (int argc, char **argv)
 {
+    int ret = 1;
+
     CFStringRef zsTerminate = CFSTR("ZSRelay::applicationWillTerminate");
     CFStringRef zsReConfig  = CFSTR("ZSRelay::applicationNeedsReConfigure");
 
     CFNotificationCenterRef notifyCenter = NULL;
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     if (argc >= 2)
     {
 	if (strncmp("start", argv[1], 4) == 0)
 	{
-	    return system("/bin/launchctl load -w /Library/LaunchDaemons/org.bitspin.zsrelay.plist");
+	    ret = system("/bin/launchctl load -w /Library/LaunchDaemons/org.bitspin.zsrelay.plist");
 	}
 	else if (strncmp("stop", argv[1], 4) == 0)
 	{
 	    notifyCenter = CFNotificationCenterGetDarwinNotifyCenter();
 	    CFNotificationCenterPostNotification(notifyCenter, zsTerminate, NULL, NULL, true);
 
-	    return system("/bin/launchctl unload -w /Library/LaunchDaemons/org.bitspin.zsrelay.plist");
+	    ret = system("/bin/launchctl unload -w /Library/LaunchDaemons/org.bitspin.zsrelay.plist");
 	}
 	else if (strncmp("reconf", argv[1], 6) == 0)
 	{
@@ -53,17 +57,21 @@ main (int argc, char **argv)
 	{
 	    insertPrefBundle(@"/Applications/Preferences.app/Settings-iPhone.plist");
 	    insertPrefBundle(@"/Applications/Preferences.app/Settings-iPod.plist");
-	    return 0;
 	}
 	else if(strncmp("remove-plugin", argv[1], 13) == 0)
 	{
 	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPhone.plist");
 	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPod.plist");
-	    return 0;
 	}
+
+	ret = 0;
     }
-    fprintf(stderr, "usage: %s [start|stop|reconf|install-plugin|remove-plugin]\n", argv[0]);
-    return 1;
+    if (ret != 0)
+    {
+	fprintf(stderr, "usage: %s [start|stop|reconf|install-plugin|remove-plugin]\n", argv[0]);
+    }
+    [pool release];
+    return ret;
 }
 
 /* thanks to scrobbled 2.0 */

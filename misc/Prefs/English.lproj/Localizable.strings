@@ -1,0 +1,13 @@
+﻿
+/* Enable/Disable zsrelay */
+"Enable zsrelay" = "Enable zsrelay";
+
+/* Enable/Disable status icons */
+"Show Icons" = "Show Icons";
+
+/* Enable/Disable network Keep alive */
+"Insomnia mode" = "Insomnia mode";
+
+/* battery notice */
+ "Please note that Insomnia mode will drain your battery." = "Please note that Insomnia mode will drain your battery.";
+

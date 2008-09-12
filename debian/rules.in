@@ -44,11 +44,20 @@ install: build
 	install -d $(DEBDESTDIR)/Library/LaunchDaemons
 	install -d $(DEBDESTDIR)/Library/ZSRelay/ZSRelay.app
 	install -d $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app
+	install -d $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle
+	install -d $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/English.lproj
+	install -d $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/German.lproj
 
-	install -m 0755 src/zsrelay/ZSRelay.app/* $(DEBDESTDIR)/Library/ZSRelay/ZSRelay.app/
-	install -m 0755 misc/org.bitspin.zsrelay.plist $(DEBDESTDIR)/Library/LaunchDaemons
-	install -m 0644 misc/*.png $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/
 	install -m 0755 misc/zswrapper $(DEBDESTDIR)/usr/sbin/zsrelay
+	install -m 0755 src/zsrelay/ZSRelay.app/* $(DEBDESTDIR)/Library/ZSRelay/ZSRelay.app/
+
+	cp -r src/prefplug/ZSRelaySettings.bundle/* $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/
+	chmod -R 0644 $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/
+	chmod    0755 $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/ZSRelaySettings
+
+	install -m 0755 misc/org.bitspin.zsrelay.plist $(DEBDESTDIR)/Library/LaunchDaemons/
+	install -m 0644 misc/FSO_*.png $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/
+	install -m 0644 misc/Default_*.png $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/
 
 # Build architecture-independent files here.
 binary-indep: build install

@@ -6,6 +6,11 @@ chown root:wheel /Library/LaunchDaemons/org.bitspin.zsrelay.plist
 chmod +s /usr/sbin/zsrelay
 chmod +s /usr/sbin/zscmd
 
+chown mobile:wheel /Library/ZSRelay/ZSRelay.app/zsrelay
+chmod +s /Library/ZSRelay/ZSRelay.app/zsrelay
+
+/usr/sbin/zscmd install-plugin
+
 echo <<EOS
 -------------------------------------------------
 zsrelay 0.5.0 - beta

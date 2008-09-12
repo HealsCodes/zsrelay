@@ -44,6 +44,7 @@ void iphone_app_main(void);
 +(ZSRelayApp*)sharedApp:(ZSRelayApp*)newInstance;
 
 -(void)applicationDidFinishLaunching:(id)unused;
+-(void)applicationNeedsReConfigure;
 -(void)applicationWillTerminate;
 @end
 

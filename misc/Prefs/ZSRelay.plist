@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>zsrelay Settings</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>org.bitspin.zsrelay</string>
+			<key>key</key>
+			<string>zsrelayEnabled</string>
+			<key>label</key>
+			<string>Enable zsrelay</string>
+			<key>set</key>
+			<string>setDaemonEnabled:specifier:</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>org.bitspin.zsrelay</string>
+			<key>key</key>
+			<string>displayStatusIcons</string>
+			<key>label</key>
+			<string>Show Icons</string>
+			<key>set</key>
+			<string>setPrefVal:specifier:</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>org.bitspin.zsrelay</string>
+			<key>key</key>
+			<string>networkKeepAlive</string>
+			<key>label</key>
+			<string>Insomnia mode</string>
+			<key>set</key>
+			<string>setPrefVal:specifier:</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>isStaticText</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTitleValueCell</string>
+			<key>label</key>
+			<string>Please note that Insomnia mode will drain your battery.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>isStaticText</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTitleValueCell</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>zsrelay</string>
+</dict>
+</plist>

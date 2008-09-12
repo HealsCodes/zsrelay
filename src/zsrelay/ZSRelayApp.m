@@ -201,6 +201,17 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     /* register for darwin notifications */
     [self registerNotifications];
 
+    setuid(springboard_uid());
+    sleep(2);
+
+    [self applicationNeedsReConfigure];
+}
+
+-(void)applicationNeedsReConfigure
+{
+    [self removeAllIcons];
+    [self setNetworkKeepAlive:NO];
+
     if ([self loadSettings] == NO)
     {
 	NSLog(@"failed to load settings!");
@@ -250,8 +261,6 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	    NSLog(@"failed to register hook");
 	}
     }
-    setuid(springboard_uid());
-    sleep(2);
 }
 
 -(void)applicationWillTerminate
@@ -259,6 +268,7 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     /* remove all possible icons and disable notifications */
     [self removeAllIcons];
     [self removeNotifications];
+    [self setNetworkKeepAlive:NO];
 }
 @end
 

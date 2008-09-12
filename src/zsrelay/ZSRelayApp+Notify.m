@@ -81,6 +81,7 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     else if ([notification compare:(NSString*)zsReConfig] == NSOrderedSame)
     {
 	NSLog(@"handleNotification: applicationNeedsReConfigure");
+	[self applicationNeedsReConfigure];
     }
     else
     {
