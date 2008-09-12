@@ -9,5 +9,8 @@
 "Insomnia mode" = "Insomnia-Modus";
 
 /* battery notice */
-"Please note that Insomnia mode will drain your battery." = "Durch den Insomnia Modus wird die Batterielaufzeit start verkürzt!";
+"Please note that Insomnia mode will drain your battery." = "Durch den Insomnia Modus wird die Batterielaufzeit stark verkürzt!";
+
+/* support */
+"Support zsrelay" = "zsrelay unterstützen";
 

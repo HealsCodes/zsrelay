@@ -11,3 +11,6 @@
 /* battery notice */
  "Please note that Insomnia mode will drain your battery." = "Please note that Insomnia mode will drain your battery.";
 
+/* support */
+"Support zsrelay" = "Support zsrelay";
+

@@ -46,6 +46,7 @@
 -(void)setDaemonEnabled:(id)value specifier:(id)specifier;
 -(void)setPrefVal:(id)value specifier:(id)specifier;
 
+-(void)supportButton:(id)sender;
 @end
 #endif
 

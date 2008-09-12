@@ -124,6 +124,10 @@
     [self triggerReConfig];
 }
 
+-(void)supportButton:(id)sender
+{
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://bitspin.org/support.html"]];
+}
 @end
 
 /* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :
