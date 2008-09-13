@@ -32,42 +32,54 @@
 
 -(void)showIcon:(NSString*)iconName makeExclusive:(BOOL)exclusive
 {
+    NSMutableString *fullIconName = [iconName mutableCopy];
     if ([self displayStatusIcons] == NO)
     {
+	[fullIconName release];
 	return;
     }
 
-    if (exclusive)
+    if (_connected == NO)
+    {
+	[fullIconName appendString:@"NOP"];
+    }
+
+    if (exclusive == YES)
     {
 	[self removeAllIcons];
     }
 
-    [self addStatusBarImageNamed:iconName
+    [self addStatusBarImageNamed:fullIconName
 	    removeOnAbnormalExit:YES];
+
+    [fullIconName release];
 }
 
 -(void)removeIcon:(NSString*)iconName
 {
-    NSString *fullIconName = iconName;
+    NSMutableString *fullIconName = [iconName mutableCopy];
     if ([self displayStatusIcons] == NO)
     {
+	[fullIconName release];
 	return;
     }
 
-    if ([self iPhoneModemSupervisor] == YES)
+    if (_connected == NO)
     {
-	fullIconName = [iconName stringByReplacingOccurrencesOfString:@"ZSRelay"
-							   withString:@"ZSRelayNOP"];
+	[fullIconName appendString:@"NOP"];
     }
+
+    NSLog(@"DisplayIcon: %@", fullIconName);
     [self removeStatusBarImageNamed:fullIconName];
+    [fullIconName release];
 }
 
 -(void)removeAllIcons
 {
-    [self removeIcon:@"ZSRelay"];
-    [self removeIcon:@"ZSRelayNOP"];
-    [self removeIcon:@"ZSRelayInsomnia"];
-    [self removeIcon:@"ZSRelayNOPInsomnia"];
+    [self removeStatusBarImageNamed:@"ZSRelay"];
+    [self removeStatusBarImageNamed:@"ZSRelayNOP"];
+    [self removeStatusBarImageNamed:@"ZSRelayInsomnia"];
+    [self removeStatusBarImageNamed:@"ZSRelayInsomniaNOP"];
 }
 @end
 /* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :

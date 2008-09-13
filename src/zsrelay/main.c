@@ -357,6 +357,7 @@ int main(int ac, char **av)
     setreuid(0, PROCUID);
 #endif
     pthread_mutex_init(&mutex_select, NULL);
+    pthread_mutex_init(&stat_lock, NULL);
     /*    pthread_mutex_init(&mutex_gh0, NULL); */
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);

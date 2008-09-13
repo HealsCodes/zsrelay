@@ -1,4 +1,6 @@
-﻿
+﻿/* zsrelay + iPhoneModem */
+"zsrelay" = "iPhoneModem";
+
 /* Enable/Disable zsrelay */
 "Enable zsrelay" = "Enable zsrelay";
 
@@ -11,6 +13,36 @@
 /* battery notice */
  "Please note that Insomnia mode will drain your battery." = "Please note that Insomnia mode will drain your battery.";
 
+/* advanced settings */
+"Advanced" = "Advanced";
+
+/* Whoohoo */
+"Powered by zsrelay" = "Powered by zsrelay";
+
 /* support */
 "Support zsrelay" = "Support zsrelay";
+
+/* network statistics */
+"Network stats" = "Network stats";
+
+/* total active connections */
+"Connections:" = "Connections:";
+
+/* total incomming traffic */
+"Traffic in:" = "Traffic in:";
+
+/* total outgoing traffic */
+"Traffic out:" = "Traffic out:";
+
+/* connectivity settings */
+"Connectivity" = "Connectivity";
+
+/* launch ssh along with zsrelay */
+"SSH on launch" = "SSH on launch";
+
+/* URL for keep alive pinging */
+"Keep alive URI" = "Keep alive URI";
+
+/* URL for keep alive pinging - description */
+"The keep alive URI will be used to send ping's in regular intervals to keep you connected to the internet.(requires Insomnia mode)" = "The keep alive URL will be used to send ping's in regular intervals to keep you connected to the internet.(requires Insomnia mode)";
 

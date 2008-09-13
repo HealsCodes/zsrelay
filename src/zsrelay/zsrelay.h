@@ -300,6 +300,10 @@ extern int readconf __P((FILE *));
 extern int readpasswd __P((FILE *, int, char *, int, char *, int));
 
 /* relay.c */
+#ifdef IPHONE_OS
+extern pthread_mutex_t stat_lock;
+extern void accumulate_traffic __P((long *, long *, long*));
+#endif
 extern int serv_loop __P((void));
 
 /* socks.c */

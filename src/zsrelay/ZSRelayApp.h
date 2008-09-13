@@ -31,14 +31,19 @@ void iphone_app_main(void);
 
 #import <UIKit/UIKit.h>
 
+#include "zsipc-private.h"
+
 @interface ZSRelayApp : UIApplication
 {
     /* IOKit category */
     io_connect_t root_port;
     io_object_t  notifier;
 
+    Boolean _connected;
+    NSURLConnection *_urlConnection;
+
     /* Notify category */
-    CFNotificationCenterRef _notifyCenter;
+    ZSIPCRef _zsIPC;
 }
 
 +(ZSRelayApp*)sharedApp:(ZSRelayApp*)newInstance;
@@ -50,19 +55,23 @@ void iphone_app_main(void);
 
 @interface ZSRelayApp (Settings)
 -(BOOL)loadSettings;
-#if 0
--(BOOL)patchDNS;
-#endif
+-(void)unloadSettings;
+
+-(NSString*)keepAliveURI;
+
+-(BOOL)sshOnLaunch;
 -(BOOL)networkKeepAlive;
 -(BOOL)displayStatusIcons;
-/* additions for iPhoneModem support */
--(BOOL)iPhoneModem;
--(BOOL)iPhoneModemSupervisor;
 @end
 
 @interface ZSRelayApp (IOKit)
 -(BOOL)setNetworkKeepAlive:(BOOL)isActive;
 -(void)handlePMMessage:(natural_t)type withArgument:(void *)argument;
+
+-(void)connectionKeepAlive;
+/* NSURLConnection delegate methods */
+-(void)connection:(NSURLConnection*)theConnection didFailWithError:(NSError*)error;
+-(void)connectionDidFinishLoading:(NSURLConnection*)theConnection;
 @end
 
 @interface ZSRelayApp (Notify)

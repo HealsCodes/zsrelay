@@ -76,10 +76,12 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 
 - (void)handlePMMessage:(natural_t)type withArgument:(void *) argument
 {
+    static int messagesSoFar = 0;
+
     switch (type)
     {
 	case kIOMessageSystemWillSleep:
-	    IOAllowPowerChange(root_port, (long)argument);  
+	    IOAllowPowerChange(root_port, (long)argument);
 	    break;
 
 	case kIOMessageCanSystemSleep:
@@ -89,6 +91,74 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 	case kIOMessageSystemHasPoweredOn:
 	    break;
     }
+
+    messagesSoFar++;
+
+    if (messagesSoFar == 20) /* one message each 30 seconds */
+    {
+	[self connectionKeepAlive];
+	messagesSoFar = 0;
+    }
+}
+
+-(void)connectionKeepAlive
+{
+    NSURL *aURL = nil;
+    NSMutableURLRequest *request = nil;
+
+    if (_urlConnection != nil)
+    {
+	NSLog(@"Ignoring keep alive - request pending");
+	return;
+    }
+
+    NSLog(@"Sending keep alive to %@", [self keepAliveURI]);
+
+    aURL     = [NSURL URLWithString:[self keepAliveURI]];
+    request  = [NSMutableURLRequest requestWithURL:aURL
+				       cachePolicy:NSURLRequestReloadIgnoringCacheData
+				   timeoutInterval:30.0];
+
+    [request setHTTPMethod:@"HEAD"];
+    _urlConnection = [NSURLConnection connectionWithRequest:request
+						   delegate:self];
+}
+
+-(void)connection:(NSURLConnection*)theConnection didFailWithError:(NSError*)error
+{
+    _connected = NO;
+    NSLog(@"keep alive failed with error: %@",
+	    [error localizedDescription]);
+
+    if ([self networkKeepAlive] == YES)
+    {
+	[self showIcon:@"ZSRelayInsomnia"];
+    }
+    else
+    {
+	[self showIcon:@"ZSRelay"];
+    }
+
+    [theConnection release];
+    _urlConnection = nil;
+}
+
+-(void)connectionDidFinishLoading:(NSURLConnection*)theConnection
+{
+    _connected = YES;
+    NSLog(@"keep alive successful");
+
+    if ([self networkKeepAlive] == YES)
+    {
+	[self showIcon:@"ZSRelayInsomnia"];
+    }
+    else
+    {
+	[self showIcon:@"ZSRelay"];
+    }
+
+    [theConnection release];
+    _urlConnection = nil;
 }
 
 @end

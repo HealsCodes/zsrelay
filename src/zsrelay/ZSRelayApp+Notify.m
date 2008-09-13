@@ -23,9 +23,6 @@
 
 #import "ZSRelayApp.h"
 
-static CFStringRef zsTerminate = CFSTR("ZSRelay::applicationWillTerminate");
-static CFStringRef zsReConfig  = CFSTR("ZSRelay::applicationNeedsReConfigure");
-
 static void
 iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 			  CFStringRef name, const void *object, CFDictionaryRef userInfo)
@@ -39,56 +36,60 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 @implementation ZSRelayApp (Notify)
 -(void)registerNotifications
 {
-    if (_notifyCenter != NULL)
-    {
-	return;
-    }
+    const CFStringRef *ZSMsgList[] = {
+	&ZSMsgDoTerminate,
+	&ZSMsgDoReConfig,
+	&ZSMsgDoTrafficStats,
 
-    _notifyCenter = CFNotificationCenterGetDarwinNotifyCenter();
+	NULL
+    };
 
-    CFNotificationCenterAddObserver(_notifyCenter,
-				    self,
-				    iphone_app_handle_notify,
-				    zsTerminate,
-				    NULL,
-				    CFNotificationSuspensionBehaviorDeliverImmediately);
-
-    CFNotificationCenterAddObserver(_notifyCenter,
-				    self,
-				    iphone_app_handle_notify,
-				    zsReConfig,
-				    NULL,
-				    CFNotificationSuspensionBehaviorCoalesce);
+    _zsIPC = ZSInitMessagingFull(iphone_app_handle_notify, self, ZSMsgList);
 }
 
 -(void)removeNotifications
 {
-    if (_notifyCenter == NULL)
-    {
-	return;
-    }
-
-    CFNotificationCenterRemoveEveryObserver(_notifyCenter, self);
+    ZSDestroy(_zsIPC);
 }
 
 -(void)handleNotification:(NSString*)notification
 {
-    if ([notification compare:(NSString*)zsTerminate] == NSOrderedSame)
+    if ([notification compare:(NSString*)ZSMsgDoTerminate] == NSOrderedSame)
     {
 	NSLog(@"handleNotification: applicationWillTerminate");
 	[self applicationWillTerminate];
     }
-    else if ([notification compare:(NSString*)zsReConfig] == NSOrderedSame)
+    else if ([notification compare:(NSString*)ZSMsgDoReConfig] == NSOrderedSame)
     {
 	NSLog(@"handleNotification: applicationNeedsReConfigure");
 	[self applicationNeedsReConfigure];
+    }
+    else if ([notification compare:(NSString*)ZSMsgDoTrafficStats] == NSOrderedSame)
+    {
+	FILE *statusFile = NULL;
+
+	long trafficIn = 0;
+	long trafficOut = 0;
+	long connections = 0;
+
+	NSLog(@"handleNotification: pollTrafficStats");
+	accumulate_traffic(&trafficIn, &trafficOut, &connections);
+
+	statusFile = fopen(ZSURLStatus, "w");
+	if (statusFile != NULL)
+	{
+	    fprintf(statusFile, "%ld;%ld;%ld\n",
+		    trafficIn,
+		    trafficOut,
+		    connections);
+	    fclose(statusFile);
+	}
     }
     else
     {
 	NSLog(@"handleNotification: ignoring '%@'", notification);
     }
 }
-
 @end
 
 /* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :

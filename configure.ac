@@ -56,6 +56,7 @@ dnl Checks for programs.
 GCC=yes
 AC_PROG_CC
 AC_PROG_OBJC
+AC_PROG_RANLIB
 
 dnl Check for iPhone cross compile
 AC_ARG_ENABLE(iphone-extras,
@@ -281,7 +282,14 @@ if test x$iphoneos = xyes; then
 	LDFLAGS=$(echo $LDFLAGS | sed -e's/-s //g')
 fi
 
-AC_OUTPUT(Makefile doc/Makefile src/Makefile src/zsrelay/Makefile src/zscmd/Makefile src/prefplug/Makefile debian/control debian/changelog debian/rules)
+AC_OUTPUT([Makefile
+	   doc/Makefile
+	   src/Makefile
+	   src/zsrelay/Makefile
+	   src/zscmd/Makefile
+	   src/prefplug/Makefile
+	   src/zsipc/Makefile
+	   debian/control debian/changelog debian/rules])
 
 dnl from acconfig.h
 AH_TEMPLATE([FREEBSD],

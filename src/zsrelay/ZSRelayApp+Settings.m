@@ -33,27 +33,18 @@
     if (prefs == nil)
     {
 	NSLog(@"Storing new user defaults");
-#if 0
-#if IPHONE_OS_RELEASE == 1
+
+	[[NSUserDefaults standardUserDefaults] setObject:@"http://bitspin.org"
+						  forKey:@"keepAliveURI"];
+
 	[[NSUserDefaults standardUserDefaults] setBool:YES
-						forKey:@"patchDNS"];
-#else
-	/* unsupported by default */
-	[[NSUserDefaults standardUserDefaults] setBool:NO
-						forKey:@"patchDNS"];
-#endif
-#endif
+						forKey:@"sshOnLaunch"];
+
 	[[NSUserDefaults standardUserDefaults] setBool:NO
 						forKey:@"networkKeepAlive"];
 
 	[[NSUserDefaults standardUserDefaults] setBool:YES
 						forKey:@"displayStatusIcons"];
-
-	[[NSUserDefaults standardUserDefaults] setBool:NO
-						forKey:@"iPhoneModem"];
-
-	[[NSUserDefaults standardUserDefaults] setBool:NO
-						forKey:@"iPhoneModemSupervisor"];
 
 	if ([[NSUserDefaults standardUserDefaults] synchronize] == NO)
 	{
@@ -67,16 +58,39 @@
     {
 	NSLog(@"Got user defaults.");
     }
-
+    [[NSUserDefaults standardUserDefaults] setBool:YES
+					    forKey:@"zsrelayEnabled"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     return YES;
 }
 
-#if 0
--(BOOL)patchDNS
+-(void)unloadSettings
 {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:@"patchDNS"];
+    [[NSUserDefaults standardUserDefaults] setBool:NO
+					    forKey:@"zsrelayEnabled"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
-#endif
+
+-(NSString*)keepAliveURI
+{
+    NSString *theURI = [[NSUserDefaults standardUserDefaults] stringForKey:@"keepAliveURI"];
+
+    if (theURI == nil)
+    {
+	[[NSUserDefaults standardUserDefaults] setObject:@"http://bitspin.org"
+						  forKey:@"keepAliveURI"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+
+	return [self keepAliveURI];
+    }
+
+    return theURI;
+}
+
+-(BOOL)sshOnLaunch
+{
+    return [[NSUserDefaults standardUserDefaults] boolForKey:@"sshOnLaunch"];
+}
 
 -(BOOL)networkKeepAlive
 {
@@ -86,16 +100,6 @@
 -(BOOL)displayStatusIcons
 {
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"displayStatusIcons"];
-}
-
--(BOOL)iPhoneModem
-{
-    return [[NSUserDefaults standardUserDefaults] boolForKey:@"iPhoneModem"];
-}
-
--(BOOL)iPhoneModemSupervisor
-{
-    return [[NSUserDefaults standardUserDefaults] boolForKey:@"iPhoneModemSupervisor"];
 }
 
 @end

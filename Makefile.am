@@ -18,9 +18,9 @@ if IPHONE_OS_RELEASE2
 		echo "Please call make with a valid SIGNHELPER (make SIGNHELPER=/path/to/helper)"; \
 		exit 1; \
 	fi
-	@$(SIGNHELPER) src/zsrelay/zsrelay
-	@$(SIGNHELPER) src/zscmd/zscmd
-	@$(SIGNHELPER) src/prefplug/ZSRelaySettings
+	$(SIGNHELPER) src/zsrelay/zsrelay
+	$(SIGNHELPER) src/zscmd/zscmd
+	$(SIGNHELPER) src/prefplug/ZSRelaySettings
 endif
 
 app-bundle: fakesign

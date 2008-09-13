@@ -34,6 +34,14 @@ extern int hosts_ctl __P((char *, char *, char *, char *));
 
 #define TIMEOUTSEC   30
 
+#ifdef IPHONE_OS
+pthread_mutex_t stat_lock;
+
+long stat_traffic_in  = 0;
+long stat_traffic_out = 0;
+long stat_connections = 0;
+#endif
+
 typedef struct {
   int from, to;
   size_t nr, nw;
@@ -67,6 +75,25 @@ int validate_access __P((char *, char *));
 int set_sock_info __P((loginfo *, int, int));
 void relay __P((int, int));
 int log_transfer __P((loginfo *));
+
+void accumulate_traffic(long *traffic_in, long *traffic_out, long *connections)
+{
+	pthread_mutex_lock(&stat_lock);
+	if (traffic_in != NULL)
+	{
+		*traffic_in = stat_traffic_in;
+	}
+	if (traffic_out != NULL)
+	{
+		*traffic_out = stat_traffic_out;
+	}
+	if (connections != NULL)
+	{
+		*connections = stat_connections;
+	}
+	printf("accumulate: %ld;%ld;%ld\n", stat_traffic_in, stat_traffic_out, stat_connections);
+	pthread_mutex_unlock(&stat_lock);
+}
 
 void readn(rlyinfo *ri)
 {
@@ -178,6 +205,14 @@ void relay(int cs, int ss)
   u_long   max_count = idle_timeout;
   u_long   timeout_count;
   loginfo  li;
+  loginfo  li_old;
+
+#ifdef IPHONE_OS
+  pthread_mutex_lock(&stat_lock);
+  stat_connections++;
+  printf("Connections++");
+  pthread_mutex_unlock(&stat_lock);
+#endif
 
   memset(&ri, 0, sizeof(ri));
   ri.nr = BUFSIZE;
@@ -189,7 +224,18 @@ void relay(int cs, int ss)
   setsignal(SIGALRM, timeout);
   gettimeofday(&ots, &tz);
   li.bc = li.upl = li.dnl = 0; ri.oob = 0; timeout_count = 0;
+  li_old.upl = li_old.dnl = 0;
+
   for (;;) {
+#ifdef IPHONE_OS
+  pthread_mutex_lock(&stat_lock);
+  stat_traffic_in  += li.dnl - li_old.dnl;
+  stat_traffic_out += li.upl - li_old.upl;
+  pthread_mutex_unlock(&stat_lock);
+
+  memcpy(&li_old, &li, sizeof(li_old));
+#endif
+
     FD_ZERO(&rfds);
     FD_SET(cs, &rfds); FD_SET(ss, &rfds);
     if (ri.oob == 0) {
@@ -260,6 +306,12 @@ void relay(int cs, int ss)
 
   close(ss);
   close(cs);
+
+#ifdef IPHONE_OS
+  pthread_mutex_lock(&stat_lock);
+  stat_connections--;
+  pthread_mutex_unlock(&stat_lock);
+#endif
 }
 
 #ifdef USE_THREAD

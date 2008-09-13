@@ -21,6 +21,8 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <Foundation/Foundation.h>
 
+#include "zsipc.h"
+
 static void insertPrefBundle(NSString* settingsFile);
 static void removePrefBundle(NSString* settingsFile);
 
@@ -28,11 +30,7 @@ int
 main (int argc, char **argv)
 {
     int ret = 1;
-
-    CFStringRef zsTerminate = CFSTR("ZSRelay::applicationWillTerminate");
-    CFStringRef zsReConfig  = CFSTR("ZSRelay::applicationNeedsReConfigure");
-
-    CFNotificationCenterRef notifyCenter = NULL;
+    ZSIPCRef zsIPC = ZSInitMessaging();
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     if (argc >= 2)
@@ -43,15 +41,28 @@ main (int argc, char **argv)
 	}
 	else if (strncmp("stop", argv[1], 4) == 0)
 	{
-	    notifyCenter = CFNotificationCenterGetDarwinNotifyCenter();
-	    CFNotificationCenterPostNotification(notifyCenter, zsTerminate, NULL, NULL, true);
-
+	    ZSSendCommand(zsIPC, ZSMsgDoTerminate);
 	    ret = system("/bin/launchctl unload -w /Library/LaunchDaemons/org.bitspin.zsrelay.plist");
 	}
 	else if (strncmp("reconf", argv[1], 6) == 0)
 	{
-	    notifyCenter = CFNotificationCenterGetDarwinNotifyCenter();
-	    CFNotificationCenterPostNotification(notifyCenter, zsReConfig, NULL, NULL, true);
+	    ZSSendCommand(zsIPC, ZSMsgDoReConfig);
+	}
+	else if (strncmp("status", argv[1], 6) == 0)
+	{
+	    long trafficIn   = 0,
+	         trafficOut  = 0,
+		 connections = 0;
+
+	    ZSPollTrafficStats(zsIPC, &trafficIn, &trafficOut, &connections);
+	    printf("traffic stats\n"
+		   "---------------\n"
+		   "connections: %d\n"
+		   "traffic in : %ld byte\n"
+		   "traffic out: %ld byte\n",
+		   connections,
+		   trafficIn,
+		   trafficOut);
 	}
 	else if(strncmp("install-plugin", argv[1], 14) == 0)
 	{
@@ -63,13 +74,21 @@ main (int argc, char **argv)
 	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPhone.plist");
 	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPod.plist");
 	}
-
+	if (strncmp("ssh-on", argv[1], 7) == 0)
+	{
+	    ret = system("/bin/launchctl load /Library/LaunchDaemons/com.openssh.sshd.plist");
+	}
+	else if (strncmp("ssh-off", argv[1], 7) == 0)
+	{
+	    ret = system("/bin/launchctl unload /Library/LaunchDaemons/com.openssh.sshd.plist");
+	}
 	ret = 0;
     }
     if (ret != 0)
     {
-	fprintf(stderr, "usage: %s [start|stop|reconf|install-plugin|remove-plugin]\n", argv[0]);
+	fprintf(stderr, "usage: %s [start|stop|status|reconf|install-plugin|remove-plugin|ssh-on|ssh-off]\n", argv[0]);
     }
+    ZSDestroy(zsIPC);
     [pool release];
     return ret;
 }
@@ -94,7 +113,7 @@ insertPrefBundle(NSString *settingsFile)
 	[NSDictionary dictionaryWithObjectsAndKeys:
 	@"PSLinkCell", @"cell",
 	@"ZSRelaySettings", @"bundle",
-	@"zsrelay", @"label",
+	@"iPhoneModem", @"label",
 	[NSNumber numberWithInt: 1], @"isController",
 	[NSNumber numberWithInt: 1], @"hasIcon",
 	nil] atIndex: [[settings objectForKey:@"items"] count] - 1];

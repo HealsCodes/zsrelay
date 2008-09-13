@@ -24,6 +24,8 @@
 #import "ZSRelaySettings.h"
 #include <stdio.h>
 
+#include "zsipc.h"
+
 @implementation LocalizedListController
 - (NSArray *)localizedSpecifiersForSpecifiers:(NSArray *)s {
 
@@ -58,7 +60,30 @@
 }
 @end
 
+@implementation LocalizedItemsController
+- (NSArray *)specifiers
+{
+    NSArray *s = [self itemsFromParent];
+    s = [self localizedSpecifiersForSpecifiers:s];
+    return s;
+}
+@end
+
 @implementation ZSRelaySettings
+
+-(id)initForContentSize:(struct CGSize)size 
+{
+    self = [super initForContentSize:size];
+    _zsIPC = ZSInitMessaging();
+
+    return self;
+}
+
+-(void)dealloc
+{
+    ZSDestroy(_zsIPC);
+    [super dealloc];
+}
 
 -(NSArray*)specifiers
 {
@@ -74,16 +99,7 @@
     FILE *child_fd = NULL;
 
     NSLog(@"triggerReConfig");
-    child_fd = popen("/usr/sbin/zscmd reconf", "r");
-    if (child_fd != NULL)
-    {
-	fclose(child_fd);
-    }
-}
-
--(BOOL)getDaemonEnabled;
-{
-    return NO;
+    ZSSendCommand(_zsIPC, ZSMsgDoReConfig);
 }
 
 -(void)setDaemonEnabled:(id)value specifier:(id)specifier
@@ -120,13 +136,115 @@
     [self setPreferenceValue:value specifier:specifier];
     [[NSUserDefaults standardUserDefaults] synchronize];
 
-//    NSLog(@"set '%@' %s", specifier, value == kCFBooleanTrue ? "on":"off");
     [self triggerReConfig];
 }
 
 -(void)supportButton:(id)sender
 {
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://bitspin.org/support.html"]];
+}
+@end
+
+@implementation AdvancedController
+
+-(id)initForContentSize:(struct CGSize)size 
+{
+    self = [super initForContentSize:size];
+    _zsIPC = ZSInitMessaging();
+
+    [NSTimer scheduledTimerWithTimeInterval:5.0
+				     target:self
+				   selector:@selector(pollTrafficStats:)
+				   userInfo:nil
+				    repeats:YES];
+    return self;
+}
+
+-(void)dealloc
+{
+    ZSDestroy(_zsIPC);
+    [super dealloc];
+}
+
+-(NSArray*)specifiers
+{
+    NSArray *s = [self loadSpecifiersFromPlistName:@"advanced"
+					    target:self];
+/*
+    s = [self localizedSpecifiersForSpecifiers:s];
+    _dummy = [s objectAtIndex: [s count] - 1];
+*/
+    return s;
+}
+
+-(void)triggerReConfig
+{
+    FILE *child_fd = NULL;
+
+    NSLog(@"triggerReConfig");
+    ZSSendCommand(_zsIPC, ZSMsgDoReConfig);
+}
+
+-(void)pollTrafficStats:(NSTimer*)aTimer
+{
+    ZSPollTrafficStats(_zsIPC, &_trafficIn, &_trafficOut, &_connections);
+    [self reload];
+ //   [self reloadSpecifier:_dummy
+ //                animated:YES];
+}
+
+-(NSString*)getTrafficIn:(id)sender
+{
+    return [self getFormatedTraffic:_trafficIn];
+}
+
+-(NSString*)getTrafficOut:(id)sender
+{
+    return [self getFormatedTraffic:_trafficOut];
+}
+
+-(NSString*)getFormatedTraffic:(long)trafficStat
+{
+    char suffix[3];
+    double tOut = 0.0;
+
+    if (trafficStat >= (1024*1024*1024))
+    {
+	strcpy(suffix, "Gb");
+	tOut = trafficStat / (1024.0*1024.0*1024.0);
+    }
+    else if (trafficStat >= (1024*1024))
+    {
+	strcpy(suffix, "Mb");
+	tOut = trafficStat / (1024.0*1024.0);
+    }
+    else if (trafficStat >= 1024)
+    {
+	strcpy(suffix, "Kb");
+	tOut = trafficStat / 1024.0;
+    }
+    else
+    {
+	strcpy(suffix, "b");
+	tOut = trafficStat;
+    }
+
+    return [NSString stringWithFormat:@"%.1f%s", tOut, suffix];
+}
+
+-(NSString*)getConnections:(id)sender
+{
+    return [NSString stringWithFormat:@"%ld", _connections];
+}
+
+-(void)setSSHEnabled:(id)value specifier:(id)specifier
+{
+    FILE *child_fd = NULL;
+
+    [self setPreferenceValue:value specifier:specifier];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+
+    [self triggerReConfig];
 }
 @end
 

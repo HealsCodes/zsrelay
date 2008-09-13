@@ -27,7 +27,10 @@
 #import <UIKit/UIHardware.h>
 
 #import <Preferences/PSListController.h>
+#import <Preferences/PSListItemsController.h>
 #import <Preferences/PSSpecifier.h>
+
+#include "zsipc.h"
 
 @interface LocalizedListController : PSListController
 {
@@ -36,18 +39,53 @@
 -(id)navigationTitle;
 @end
 
+@interface LocalizedItemsController : PSListItemsController {
+}
+-(NSArray *)specifiers;
+@end
+
+
 @interface ZSRelaySettings : LocalizedListController
 {
+    ZSIPCRef _zsIPC;
 }
+
+-(id)initForContentSize:(struct CGSize)size;
+-(void)dealloc;
+
 -(NSArray*)specifiers;
 -(void)triggerReConfig;
 
--(BOOL)getDaemonEnabled;
--(void)setDaemonEnabled:(id)value specifier:(id)specifier;
 -(void)setPrefVal:(id)value specifier:(id)specifier;
 
 -(void)supportButton:(id)sender;
 @end
+
+@interface AdvancedController : LocalizedListController
+{
+    long _trafficIn;
+    long _trafficOut;
+    long _connections;
+
+    ZSIPCRef _zsIPC;
+    NSTimer *_timer;
+    PSSpecifier *_dummy;
+}
+-(id)initForContentSize:(struct CGSize)size;
+-(void)dealloc;
+
+-(NSArray *)specifiers;
+
+-(void)pollTrafficStats:(NSTimer*)aTimer;
+-(NSString*)getTrafficIn:(id)sender;
+-(NSString*)getTrafficOut:(id)sender;
+-(NSString*)getConnections:(id)sender;
+
+-(void)setSSHEnabled:(id)value specifier:(id)specifier;
+
+-(NSString*)getFormatedTraffic:(long)trafficStat;
+@end
+
 #endif
 
 /* vim: ai ts=8 sts=4 sw=4 fdm=marker noet :

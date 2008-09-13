@@ -7,7 +7,9 @@ zsrelay_LDADD = @LIBS@
 zsrelay_LDFLAGS = @LDFLAGS@
 
 if IPHONE_OS
-zsrelay_SOURCES += ZSRelayApp.m ZSRelayApp+Settings.m ZSRelayApp+IOKit.m ZSRelayApp+Icons.m ZSRelayApp+Notify.m
-zsrelay_LDFLAGS += -framework CoreFoundation -framework Foundation -framework IOKit -framework UIKit -multiply_defined suppress -lobjc -ObjC
+INCLUDES = -I$(srcdir)/../zsipc
+zsrelay_SOURCES += ZSRelayApp.m ZSRelayApp+Settings.m ZSRelayApp+IOKit.m ZSRelayApp+Icons.m ZSRelayApp+Notify.m libzsipc.a
+zsrelay_LDADD   += -lobjc -lzsipc
+zsrelay_LDFLAGS += -L../zsipc/ -framework CoreFoundation -framework Foundation -framework IOKit -framework UIKit -multiply_defined suppress
 endif
 

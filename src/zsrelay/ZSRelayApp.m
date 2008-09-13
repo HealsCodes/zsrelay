@@ -159,7 +159,7 @@ iphone_app_main (void)
 void
 iphone_app_handle_signals (int unused)
 {
-    printf("iphone_app_handle_notify()\n");
+    printf("iphone_app_handle_signal()\n");
     if ([ZSRelayApp sharedApp:nil] != nil)
     {
 	[[ZSRelayApp sharedApp:nil] applicationWillTerminate];
@@ -192,14 +192,20 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 
 -(void)applicationDidFinishLaunching:(id)unused
 {
+    _connected = NO;
+    _urlConnection = nil;
+
     [ZSRelayApp sharedApp:self];
     /* register signal handling */
+/*
     signal(SIGTERM, iphone_app_handle_signals);
     signal(SIGKILL, iphone_app_handle_signals);
     signal(SIGSEGV, iphone_app_handle_signals);
-
+*/
     /* register for darwin notifications */
     [self registerNotifications];
+
+
 
     setuid(springboard_uid());
     sleep(2);
@@ -209,6 +215,8 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 
 -(void)applicationNeedsReConfigure
 {
+    _connected = NO;
+
     [self removeAllIcons];
     [self setNetworkKeepAlive:NO];
 
@@ -221,32 +229,6 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 
     NSLog(@"use status icons: %d", [self displayStatusIcons]);
     [self showIcon:@"ZSRelay"];
-#if 0
-#ifdef HAVE_NLIST
-    NSLog(@"use mDNSResponder fix: %d", [self patchDNS]);
-    if ([self patchDNS] == YES)
-    {
-	/* disable mDNSResponder */
-	struct nlist nl[2];
-
-	memset(nl, 0, sizeof(nl));
-	nl[0].n_un.n_name = "_useMDNSResponder";
-	nlist("/usr/lib/libc.dylib", nl);
-
-	if (nl[0].n_type != N_UNDF)
-	{
-	    *(int*)nl[0].n_value = 0;
-	    NSLog(@"mDNSResponder localy disabled");
-	}
-	else
-	{
-	    NSLog(@"mDNSResponder not in local namespace..");
-	}
-    }
-#else
-    NSLog(@"mDNSResponder fix not compiled in");
-#endif
-#endif
 
     NSLog(@"use network keep alive: %d", [self networkKeepAlive]);
     if ([self networkKeepAlive] == YES)
@@ -262,6 +244,19 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	    NSLog(@"failed to register hook");
 	}
     }
+    if ([self sshOnLaunch] == YES)
+    {
+	FILE *fd = NULL;
+	fd = popen("/usr/sbin/zscmd ssh-on", "r");
+
+	if (fd != NULL)
+	{
+	    fclose(fd);
+	}
+    }
+
+    /* send at least one keep alive */
+    [self connectionKeepAlive];
 }
 
 -(void)applicationWillTerminate
@@ -270,6 +265,18 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     [self removeAllIcons];
     [self removeNotifications];
     [self setNetworkKeepAlive:NO];
+    [self unloadSettings];
+
+    if ([self sshOnLaunch] == YES)
+    {
+	FILE *fd = NULL;
+	fd = popen("/usr/sbin/zscmd ssh-off", "r");
+
+	if (fd != NULL)
+	{
+	    fclose(fd);
+	}
+    }
 }
 @end
 
