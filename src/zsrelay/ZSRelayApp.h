@@ -26,10 +26,20 @@ void iphone_app_main(void);
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #import <IOKit/IOMessage.h>
 
+#import <Message/NetworkController.h>
+
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
 
 #import <UIKit/UIKit.h>
+
+#if IPHONE_OS_RELEASE == 1
+extern void GSEventPlaySoundAtPath(NSString *path);
+#else
+#   define TARGET_OS_IPHONE 1
+#   import <AudioToolbox/AudioServices.h>
+#   undef TARGET_OS_IPHONE
+#endif
 
 #include "zsipc-private.h"
 
@@ -44,9 +54,12 @@ void iphone_app_main(void);
 
     /* Notify category */
     ZSIPCRef _zsIPC;
+#if IPHONE_OS_RELEASE == 2
+    SystemSoundID _connectSound;
+#endif
 }
 
-+(ZSRelayApp*)sharedApp:(ZSRelayApp*)newInstance;
++(ZSRelayApp*)sharedApp;
 
 -(void)applicationDidFinishLaunching:(id)unused;
 -(void)applicationNeedsReConfigure;
@@ -69,15 +82,20 @@ void iphone_app_main(void);
 -(void)handlePMMessage:(natural_t)type withArgument:(void *)argument;
 
 -(void)connectionKeepAlive;
+-(void)synchronousConnectionKeepAlive;
 /* NSURLConnection delegate methods */
 -(void)connection:(NSURLConnection*)theConnection didFailWithError:(NSError*)error;
 -(void)connectionDidFinishLoading:(NSURLConnection*)theConnection;
+/* IO-Polling */
+-(void)waitForRequestCompletion;
 @end
 
 @interface ZSRelayApp (Notify)
 -(void)registerNotifications;
 -(void)removeNotifications;
 -(void)handleNotification:(NSString*)notification;
+
+-(void)playNotification;
 @end
 
 @interface ZSRelayApp (Icons)

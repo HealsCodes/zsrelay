@@ -76,6 +76,8 @@ int set_sock_info __P((loginfo *, int, int));
 void relay __P((int, int));
 int log_transfer __P((loginfo *));
 
+extern void iphone_app_check_connection __P((void));
+
 void accumulate_traffic(long *traffic_in, long *traffic_out, long *connections)
 {
 	pthread_mutex_lock(&stat_lock);
@@ -210,8 +212,8 @@ void relay(int cs, int ss)
 #ifdef IPHONE_OS
   pthread_mutex_lock(&stat_lock);
   stat_connections++;
-  printf("Connections++");
   pthread_mutex_unlock(&stat_lock);
+
 #endif
 
   memset(&ri, 0, sizeof(ri));
@@ -468,6 +470,9 @@ int serv_loop()
         setsignal(SIGHUP, SIG_DFL);
         releasesignal(SIGCHLD);
         releasesignal(SIGHUP);
+#ifdef IPHONE_OS
+	iphone_app_check_connection();
+#endif
 	ss = proto_socks(cs);
 	if ( ss == -1 ) {
 	  close(cs);  /* may already be closed */
@@ -484,6 +489,9 @@ int serv_loop()
       releasesignal(SIGCHLD);
 #ifdef USE_THREAD
     } else {
+#ifdef IPHONE_OS
+      iphone_app_check_connection();
+#endif
       ss = proto_socks(cs);
       if ( ss == -1 ) {
 	close(cs);  /* may already be closed */

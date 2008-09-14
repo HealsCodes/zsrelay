@@ -34,6 +34,8 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+ static ZSRelayApp *_sharedApp = nil;
+
 //From Nate True's dock application:
 static pid_t
 springboard_pid() {
@@ -160,9 +162,9 @@ void
 iphone_app_handle_signals (int unused)
 {
     printf("iphone_app_handle_signal()\n");
-    if ([ZSRelayApp sharedApp:nil] != nil)
+    if ([ZSRelayApp sharedApp] != nil)
     {
-	[[ZSRelayApp sharedApp:nil] applicationWillTerminate];
+	[[ZSRelayApp sharedApp] applicationWillTerminate];
     }
 
     cleanup();
@@ -178,15 +180,8 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 }
 
 @implementation ZSRelayApp
-+(ZSRelayApp*)sharedApp:(ZSRelayApp*)newInstance
++(ZSRelayApp*)sharedApp
 {
-    static ZSRelayApp *_sharedApp = nil;
-
-    if (newInstance != nil && _sharedApp == nil)
-    {
-	_sharedApp = newInstance;
-    }
-
     return _sharedApp;
 }
 
@@ -195,7 +190,11 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     _connected = NO;
     _urlConnection = nil;
 
-    [ZSRelayApp sharedApp:self];
+    if ([ZSRelayApp sharedApp] == nil)
+    {
+	_sharedApp = self;
+    }
+
     /* register signal handling */
 /*
     signal(SIGTERM, iphone_app_handle_signals);
@@ -204,8 +203,6 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 */
     /* register for darwin notifications */
     [self registerNotifications];
-
-
 
     setuid(springboard_uid());
     sleep(2);
@@ -216,6 +213,9 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 -(void)applicationNeedsReConfigure
 {
     _connected = NO;
+#if IPHONE_OS_RELEASE == 2
+    _connectSound = 0;
+#endif
 
     [self removeAllIcons];
     [self setNetworkKeepAlive:NO];
@@ -255,8 +255,18 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	}
     }
 
-    /* send at least one keep alive */
-    [self connectionKeepAlive];
+    if ([[NetworkController sharedInstance] isEdgeUp] == YES)
+    {
+	_connected = YES;
+	if ([self networkKeepAlive] == YES)
+	{
+	    [self showIcon:@"ZSRelayInsomnia"];
+	}
+	else
+	{
+	    [self showIcon:@"ZSRelay"];
+	}
+    }
 }
 
 -(void)applicationWillTerminate

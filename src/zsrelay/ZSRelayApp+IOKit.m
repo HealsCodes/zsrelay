@@ -22,6 +22,34 @@
 #endif
 
 #import "ZSRelayApp.h"
+#include <sched.h>
+
+void
+iphone_app_check_connection(void)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    NSLog(@"iphone_app_check_connection..");
+    if ([ZSRelayApp sharedApp] != nil)
+    {
+	if ([[NetworkController sharedInstance] isEdgeUp] == NO)
+	{
+	    NSLog(@"bringing EDGE up");
+
+	    [[ZSRelayApp sharedApp] synchronousConnectionKeepAlive];
+	    NSLog(@"EDGE should be up");
+	}
+	else
+	{
+	    NSLog(@"EDGE _is_ up");
+	}
+    }
+    else
+    {
+	NSLog(@"sharedApp == nil!");
+    }
+    [pool release];
+}
 
 /* my adaption of 'Insomnia'
  * Thanks go out to indiekiduk@gmail.com for discovering the great "feature"
@@ -101,6 +129,67 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     }
 }
 
+-(void)synchronousConnectionKeepAlive
+{
+    NSURL *aURL = nil;
+    NSMutableURLRequest *request = nil;
+    NSURLConnection *connection = nil;
+
+    if ([[NetworkController sharedInstance] isEdgeUp] == NO)
+    {
+	_connected = NO;
+	if ([self networkKeepAlive] == YES)
+	{
+	    [self showIcon:@"ZSRelayInsomnia"];
+	}
+	else
+	{
+	    [self showIcon:@"ZSRelay"];
+	}
+    }
+
+    NSLog(@"Sending synchronous keep alive to %@", [self keepAliveURI]);
+
+    aURL     = [NSURL URLWithString:[self keepAliveURI]];
+    request  = [NSMutableURLRequest requestWithURL:aURL
+				       cachePolicy:NSURLRequestReloadIgnoringCacheData
+				   timeoutInterval:30.0];
+    [request setHTTPMethod:@"HEAD"];
+
+    _urlConnection = [NSURLConnection connectionWithRequest:request
+						   delegate:self];
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSData *data            = nil;
+    NSError *error          = nil;
+    NSURLResponse *response = nil;
+
+    data = [NSURLConnection sendSynchronousRequest:request
+				 returningResponse:&response
+					     error:&error];
+
+    if (error != nil)
+    {	
+	NSLog(@"synchronous request failed: %@", [error localizedDescription]);
+    }
+    else
+    {
+	[self playNotification];
+	_connected = YES;
+
+	if ([self networkKeepAlive] == YES)
+	{
+	    [self showIcon:@"ZSRelayInsomnia"];
+	}
+	else
+	{
+	    [self showIcon:@"ZSRelay"];
+	}
+    }
+
+    [pool release];
+}
+
 -(void)connectionKeepAlive
 {
     NSURL *aURL = nil;
@@ -110,6 +199,19 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     {
 	NSLog(@"Ignoring keep alive - request pending");
 	return;
+    }
+
+    if ([[NetworkController sharedInstance] isEdgeUp] == NO)
+    {
+	_connected = NO;
+	if ([self networkKeepAlive] == YES)
+	{
+	    [self showIcon:@"ZSRelayInsomnia"];
+	}
+	else
+	{
+	    [self showIcon:@"ZSRelay"];
+	}
     }
 
     NSLog(@"Sending keep alive to %@", [self keepAliveURI]);
@@ -145,6 +247,11 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 
 -(void)connectionDidFinishLoading:(NSURLConnection*)theConnection
 {
+
+    if (_connected = NO)
+    {
+        [self playNotification];
+    }
     _connected = YES;
     NSLog(@"keep alive successful");
 
@@ -159,6 +266,7 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 
     [theConnection release];
     _urlConnection = nil;
+
 }
 
 @end
