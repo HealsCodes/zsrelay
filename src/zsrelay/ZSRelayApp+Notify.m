@@ -90,6 +90,29 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	NSLog(@"handleNotification: ignoring '%@'", notification);
     }
 }
+
+/* notification sounds */
+-(void)playNotification
+{
+#if IPHONE_OS_RELEASE == 1
+    GSEventPlaySoundAtPath(@"/System/Library/Audio/UISounds/Tink.caf");
+#else
+    if (_connectSound == 0)
+    {
+	CFURLRef path = CFURLCreateWithFileSystemPath(
+			    kCFAllocatorDefault,
+			    CFSTR("/System/Library/Audio/UISounds/Tink.caf"),
+			    kCFURLPOSIXPathStyle,
+			    false);
+	AudioServicesCreateSystemSoundID(path, &_connectSound);
+	CFRelease(path);
+
+	NSLog(@"SystemSoundID: %d", _connectSound);
+    }
+
+    AudioServicesPlaySystemSound(_connectSound);
+#endif
+}
 @end
 
 /* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :
