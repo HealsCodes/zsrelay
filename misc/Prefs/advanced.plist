@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Network stats</string>
+		</dict>
+		<dict>
+			<key>label</key>
+			<string>Connections:</string>
+			<key>get</key>
+			<string>getConnections:</string>
+		</dict>
+		<dict>
+			<key>label</key>
+			<string>Traffic in:</string>
+			<key>get</key>
+			<string>getTrafficIn:</string>
+		</dict>
+		<dict>
+			<key>label</key>
+			<string>Traffic out:</string>
+			<key>get</key>
+			<string>getTrafficOut:</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>isStaticText</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Tweaks</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>Show Icons</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>org.bitspin.zsrelay</string>
+			<key>key</key>
+			<string>displayStatusIcons</string>
+			<key>set</key>
+			<string>setPrefVal:specifier:</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>label</key>
+			<string>Keep alive URL</string>
+			<key>default</key>
+			<string>http://bitspin.org</string>
+			<key>defaults</key>
+			<string>org.bitspin.zsrelay</string>
+			<key>key</key>
+			<string>keepAliveURI</string>
+			<key>set</key>
+			<string>setPrefVal:specifier:</string>
+			<key>noAutoCorret</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>isStaticText</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTitleValueCell</string>
+			<key>label</key>
+			<string>This URL will be polled to keep your connection happy.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>isStaticText</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTitleValueCell</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>Advanced</string>
+</dict>
+</plist>
