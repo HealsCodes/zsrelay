@@ -86,7 +86,16 @@ main (int argc, char **argv)
     }
     if (ret != 0)
     {
-	fprintf(stderr, "usage: %s [start|stop|status|reconf|install-plugin|remove-plugin|ssh-on|ssh-off]\n", argv[0]);
+	fprintf(stderr, "usage: %s command\n"
+			"supported commands include:\n"
+			"  start/stop     - start / stop zsrelay\n"
+			"  status         - poll and display traffic stats\n"
+			"  reconf         - trigger config reload\n"
+			"\n"
+			"  install-plugin - install preference bundle\n"
+			"  remove-plugin  - remove preference bundle\n"
+			"  ssh-on/ssh-off - star / stop ssh daemon\n",
+			argv[0]);
     }
     ZSDestroy(zsIPC);
     [pool release];
