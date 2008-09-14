@@ -131,8 +131,6 @@
 
 -(void)setPrefVal:(id)value specifier:(id)specifier
 {
-    FILE *child_fd = NULL;
-
     [self setPreferenceValue:value specifier:specifier];
     [[NSUserDefaults standardUserDefaults] synchronize];
 
@@ -162,6 +160,7 @@
 
 -(void)dealloc
 {
+    unlink(ZSURLStatus);
     ZSDestroy(_zsIPC);
     [super dealloc];
 }
@@ -170,10 +169,7 @@
 {
     NSArray *s = [self loadSpecifiersFromPlistName:@"advanced"
 					    target:self];
-/*
     s = [self localizedSpecifiersForSpecifiers:s];
-    _dummy = [s objectAtIndex: [s count] - 1];
-*/
     return s;
 }
 
@@ -189,8 +185,6 @@
 {
     ZSPollTrafficStats(_zsIPC, &_trafficIn, &_trafficOut, &_connections);
     [self reload];
- //   [self reloadSpecifier:_dummy
- //                animated:YES];
 }
 
 -(NSString*)getTrafficIn:(id)sender
@@ -237,15 +231,7 @@
     return [NSString stringWithFormat:@"%ld", _connections];
 }
 
--(void)setSSHEnabled:(id)value specifier:(id)specifier
-{
-    FILE *child_fd = NULL;
 
-    [self setPreferenceValue:value specifier:specifier];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-
-    [self triggerReConfig];
-}
 @end
 
 /* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :

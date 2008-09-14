@@ -56,6 +56,8 @@
 -(NSArray*)specifiers;
 -(void)triggerReConfig;
 
+-(void)setDaemonEnabled:(id)value specifier:(id)specifier;
+-(void)setSSHEnabled:(id)value specifier:(id)specifier;
 -(void)setPrefVal:(id)value specifier:(id)specifier;
 
 -(void)supportButton:(id)sender;
@@ -68,8 +70,6 @@
     long _connections;
 
     ZSIPCRef _zsIPC;
-    NSTimer *_timer;
-    PSSpecifier *_dummy;
 }
 -(id)initForContentSize:(struct CGSize)size;
 -(void)dealloc;
@@ -80,8 +80,6 @@
 -(NSString*)getTrafficIn:(id)sender;
 -(NSString*)getTrafficOut:(id)sender;
 -(NSString*)getConnections:(id)sender;
-
--(void)setSSHEnabled:(id)value specifier:(id)specifier;
 
 -(NSString*)getFormatedTraffic:(long)trafficStat;
 @end
