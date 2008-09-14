@@ -15,8 +15,7 @@ Description: zsrelay is an extended port of srelay.
  - integration into Preferences.app
  - live trafic monitoring in preferences
  - configurable status icons
-
- In additian to this the version for firmware 1.1.X
+ In additian to this the version for firmware 1.1.x
  contains a DNS fix suggested by Jay Freeman (saurik)
  - see http://saurik.com/id/7.
 Name: zsrelay
