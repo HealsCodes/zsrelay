@@ -2,7 +2,7 @@
 "zsrelay" = "iPhoneModem";
 
 /* Enable/Disable zsrelay */
-"Enable zsrelay" = "Enable zsrelay";
+"Enable zsrelay" = "Enable Proxy";
 
 /* Enable/Disable status icons */
 "Show Icons" = "Show Icons";
@@ -29,20 +29,20 @@
 "Connections:" = "Connections:";
 
 /* total incomming traffic */
-"Traffic in:" = "Traffic in:";
+"Traffic in:" = "Download:";
 
 /* total outgoing traffic */
-"Traffic out:" = "Traffic out:";
+"Traffic out:" = "Upload:";
 
 /* connectivity settings */
-"Connectivity" = "Connectivity";
+"Tweaks" = "Tweaks";
 
 /* launch ssh along with zsrelay */
 "SSH on launch" = "SSH on launch";
 
 /* URL for keep alive pinging */
-"Keep alive URI" = "Keep alive URI";
+"Keep alive URL" = "Keep alive URL";
 
 /* URL for keep alive pinging - description */
-"The keep alive URI will be used to send ping's in regular intervals to keep you connected to the internet.(requires Insomnia mode)" = "The keep alive URL will be used to send ping's in regular intervals to keep you connected to the internet.(requires Insomnia mode)";
+"This URL will be polled to keep your connection happy" = "This URL will be polled to keep your connection happy";
 

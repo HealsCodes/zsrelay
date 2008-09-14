@@ -2,7 +2,7 @@
 "zsrelay" = "iPhoneModem";
 
 /* Enable/Disable zsrelay */
-"Enable zsrelay" = "zsrelay aktivieren";
+"Enable zsrelay" = "Proxy aktivieren";
 
 /* Enable/Disable status icons */
 "Show Icons" = "Status-Symbole";
@@ -35,14 +35,14 @@
 "Traffic out:" = "Upload:";
 
 /* connectivity settings */
-"Connectivity" = "Connectivity";
+"Tweaks" = "Tweaks";
 
 /* launch ssh along with zsrelay */
 "SSH on launch" = "SSH laden";
 
 /* URL for keep alive pinging */
-"Keep alive URI" = "Keep-Alive URI";
+"Keep alive URL" = "Keep-Alive URL";
 
 /* URL for keep alive pinging - description */
-"The keep alive URI will be used to send ping's in regular intervals to keep you connected to the internet.(requires Insomnia mode)" = "Um die Internetverbindung aktiv zu halten wird in regelmäßigen Abständen ein ping zur Keep-Alive URI gesendet.";
+"This URL will be polled to keep your connection happy." = "Diese URL wird zum Aufrechterhalten der Internetverbindung genutzt.";
 

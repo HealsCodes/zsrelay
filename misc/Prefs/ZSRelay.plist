@@ -11,44 +11,52 @@
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>Enable zsrelay</string>
+			<key>icon</key>
+			<string>pref_zsrelay.png</string>
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
 			<string>org.bitspin.zsrelay</string>
 			<key>key</key>
 			<string>zsrelayEnabled</string>
-			<key>label</key>
-			<string>Enable zsrelay</string>
 			<key>set</key>
 			<string>setDaemonEnabled:specifier:</string>
 		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key>
-			<false/>
-			<key>defaults</key>
-			<string>org.bitspin.zsrelay</string>
-			<key>key</key>
-			<string>displayStatusIcons</string>
 			<key>label</key>
-			<string>Show Icons</string>
-			<key>set</key>
-			<string>setPrefVal:specifier:</string>
-		</dict>
-		<dict>
+			<string>Insomnia mode</string>
+			<key>icon</key>
+			<string>pref_insomnia.png</string>
 			<key>alternateColors</key>
 			<true/>
-			<key>cell</key>
-			<string>PSSwitchCell</string>
 			<key>default</key>
 			<false/>
 			<key>defaults</key>
 			<string>org.bitspin.zsrelay</string>
 			<key>key</key>
 			<string>networkKeepAlive</string>
+			<key>set</key>
+			<string>setPrefVal:specifier:</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
 			<key>label</key>
-			<string>Insomnia mode</string>
+			<string>SSH on launch</string>
+			<key>icon</key>
+			<string>pref_ssh.png</string>
+			<key>alternateColors</key>
+			<true/>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>org.bitspin.zsrelay</string>
+			<key>key</key>
+			<string>sshOnLaunch</string>
 			<key>set</key>
 			<string>setPrefVal:specifier:</string>
 		</dict>
