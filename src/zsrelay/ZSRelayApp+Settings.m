@@ -46,6 +46,9 @@
 	[[NSUserDefaults standardUserDefaults] setBool:YES
 						forKey:@"displayStatusIcons"];
 
+	[[NSUserDefaults standardUserDefaults] setBool:NO
+						forKey:@"debug"];
+
 	if ([[NSUserDefaults standardUserDefaults] synchronize] == NO)
 	{
 	    return NO;

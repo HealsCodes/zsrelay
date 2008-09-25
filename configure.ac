@@ -289,6 +289,7 @@ AC_OUTPUT([Makefile
 	   src/zscmd/Makefile
 	   src/prefplug/Makefile
 	   src/zsipc/Makefile
+	   src/zslauncher/Makefile
 	   debian/control debian/changelog debian/rules])
 
 dnl from acconfig.h

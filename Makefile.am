@@ -21,6 +21,7 @@ if IPHONE_OS_RELEASE2
 	$(SIGNHELPER) src/zsrelay/zsrelay
 	$(SIGNHELPER) src/zscmd/zscmd
 	$(SIGNHELPER) src/prefplug/ZSRelaySettings
+	$(SIGNHELPER) src/zslauncher/ZSLauncher
 endif
 
 app-bundle: fakesign
@@ -33,7 +34,12 @@ pref-bundle: app-bundle
 	@cp -r $(srcdir)/misc/Prefs/* src/prefplug/ZSRelaySettings.bundle/
 	@cp src/prefplug/ZSRelaySettings src/prefplug/ZSRelaySettings.bundle/
 
-dist-deb: pref-bundle
+launcher-bundle: pref-bundle
+	@mkdir -p src/zslauncher/iPhoneModem.app
+	@cp -r $(srcdir)/misc/Launcher/* src/zslauncher/iPhoneModem.app/
+	@cp src/zslauncher/ZSLauncher src/zslauncher/iPhoneModem.app/
+
+dist-deb: launcher-bundle
 	@cp -f $(srcdir)/debian/{pre,post}{inst,rm} debian/ || true
 	@mkdir -p doc
 	@mkdir -p tools

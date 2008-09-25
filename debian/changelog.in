@@ -1,14 +1,22 @@
+org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@8) unstable; urgency=low
+
+  * Support for logging to /var/log/zsrelay.log (Prefs: debug=YES)
+  * One-Click launcher for iPhoneModem
+  * Tweaks in Prefpane + WiFi config for Launcher
+
+ -- Rene Koecher <shirk@bitspin.org>  Thu, 25 Sep 2008 22:44:05 +0200
+
 org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@7) unstable; urgency=low
 
   * Support for status icons, insomnia-mode
   * Extra configuration in org.bitspin.zsrelay.plist
   * Start and stop via zscmd tool (launchctl based)
 
- -- René Köcher <shirk@bitspin.org>  Wed, 10 Sep 2008 24:43:00 +0200
+ -- Rene Koecher <shirk@bitspin.org>  Wed, 10 Sep 2008 24:43:00 +0200
 
 org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@6) unstable; urgency=low
 
   * First fully autoconf/automake and dpkg-buildpackag compatible version
 
- -- René Köcher <shirk@bitspin.org>  Sun, 31 Jul 2008 19:55:00 +0200
+ -- Rene Koecher <shirk@bitspin.org>  Sun, 31 Jul 2008 19:55:00 +0200
 

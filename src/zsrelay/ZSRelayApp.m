@@ -195,6 +195,11 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	_sharedApp = self;
     }
 
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"debug"] == YES)
+    {
+	freopen("/tmp/zsrelay.log", "w", stderr);
+    }
+
     /* register signal handling */
 /*
     signal(SIGTERM, iphone_app_handle_signals);
@@ -208,6 +213,8 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     sleep(2);
 
     [self applicationNeedsReConfigure];
+    /* ping */
+    [self connectionKeepAlive];
 }
 
 -(void)applicationNeedsReConfigure

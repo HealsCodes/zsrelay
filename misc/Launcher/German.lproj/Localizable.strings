@@ -1,0 +1,30 @@
+/* startup */
+"Loading..." = "Laden...";
+
+/* termination */
+"Terminating..." = "Beenden...";
+
+/* Step 1: bring up WiFi */
+"Enabling WiFi.." = "Aktiviere WiFi";
+
+/* Step 1 failed! */
+"Unable to enable WiFi!" = "Fehler beim aktivieren!";
+
+/* Step 2: scan for networks */
+"Scanning for Network.." = "Netzwerk suchen...";
+
+/* Step 3: enable proxy */
+"Enabling proxy..." = "Aktiviere Proxy...";
+
+/* Step 3 failed! */
+"Failed to start proxy!" = "Konnte Proxy nicht starten!";
+
+/* Step 4: connect to WiFi */
+"Connecting..." = "Verbinden...";
+
+/* Step 4 failed! */
+"Failed to connect!" = "Verbindungsfehler!";
+
+/* We're done */
+"Have fun!" = "Viel Spaß!";
+

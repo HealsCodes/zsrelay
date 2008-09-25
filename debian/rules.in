@@ -48,12 +48,20 @@ install: build
 	install -d $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/English.lproj
 	install -d $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/German.lproj
 
+	install -d $(DEBDESTDIR)/Applications/iPhoneModem.app
+	install -d $(DEBDESTDIR)/Applications/iPhoneModem.app/English.lproj
+	install -d $(DEBDESTDIR)/Applications/iPhoneModem.app/German.lproj
+
 	install -m 0755 misc/zswrapper $(DEBDESTDIR)/usr/sbin/zsrelay
 	install -m 0755 src/zsrelay/ZSRelay.app/* $(DEBDESTDIR)/Library/ZSRelay/ZSRelay.app/
 
 	cp -r src/prefplug/ZSRelaySettings.bundle/* $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/
 	chmod -R 0644 $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/
 	chmod    0755 $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/ZSRelaySettings
+
+	cp -r src/zslauncher/iPhoneModem.app/* $(DEBDESTDIR)/Applications/iPhoneModem.app/
+	chmod -R 0644 $(DEBDESTDIR)/Applications/iPhoneModem.app/
+	chmod    0755 $(DEBDESTDIR)/Applications/iPhoneModem.app/ZSLauncher
 
 	install -m 0755 misc/org.bitspin.zsrelay.plist $(DEBDESTDIR)/Library/LaunchDaemons/
 	install -m 0644 misc/FSO_*.png $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/

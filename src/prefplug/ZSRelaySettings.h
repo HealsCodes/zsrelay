@@ -84,6 +84,17 @@
 -(NSString*)getFormatedTraffic:(long)trafficStat;
 @end
 
+@interface NetworkSettingsController : LocalizedListController
+{
+}
+-(id)initForContentSize:(struct CGSize)size;
+
+-(NSArray *)specifiers;
+
+-(void)factoryDefaultsButton:(id)sender;
+@end
+
+
 #endif
 
 /* vim: ai ts=8 sts=4 sw=4 fdm=marker noet :

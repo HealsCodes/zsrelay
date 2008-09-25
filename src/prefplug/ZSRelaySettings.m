@@ -231,6 +231,26 @@
     return [NSString stringWithFormat:@"%ld", _connections];
 }
 
+@end
+
+@implementation NetworkSettingsController
+
+-(id)initForContentSize:(struct CGSize)size 
+{
+    self = [super initForContentSize:size];
+    return self;
+}
+
+-(NSArray*)specifiers
+{
+    NSArray *s = [self loadSpecifiersFromPlistName:@"network"
+					    target:self];
+    s = [self localizedSpecifiersForSpecifiers:s];
+    return s;
+}
+-(void)factoryDefaultsButton:(id)sender
+{
+}
 
 @end
 
