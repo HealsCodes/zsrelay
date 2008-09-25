@@ -96,7 +96,7 @@ _DestroyApple8011 (void)
     if (_netInfo == nil)
     {
 	/* factory defaults */
-	[[NSUserDefaults standardUserDefaults] setObject:@"Appollon"
+	[[NSUserDefaults standardUserDefaults] setObject:@"Apollon"
 						  forKey:@"ESSID"];
 
 	[[NSUserDefaults standardUserDefaults] setObject:@""
@@ -143,12 +143,13 @@ _DestroyApple8011 (void)
 //	[self showStatus:msg];
 //	[msg release];
 
-	NSLog(@"Scan: %@ (WEP:%d,WPA:%d)", essid, wep, wpa);
+	NSLog(@"Scan: [%@] '%@' (WEP:%d,WPA:%d)", bssid, essid, wep, wpa);
 	if ([[_netInfo objectForKey:@"ESSID"] length] >= 1)
 	{
 	    if ([essid compare:[_netInfo objectForKey:@"ESSID"]] != NSOrderedSame)
 	    {
-		NSLog(@"- ESSID doesn't match.");
+		NSLog(@"- ESSID doesn't match (expected '%@').",
+		      [_netInfo objectForKey:@"ESSID"]);
 		continue;
 	    }
 	}
@@ -156,7 +157,8 @@ _DestroyApple8011 (void)
 	{
 	    if ([bssid compare:[_netInfo objectForKey:@"BSSID"]] != NSOrderedSame)
 	    {
-		NSLog(@"- BSSID doesn't match.");
+		NSLog(@"- BSSID doesn't match (expected '%@').",
+		      [_netinfo objectForKey:@"BSSID"]);
 		continue;
 	    }
 	}
