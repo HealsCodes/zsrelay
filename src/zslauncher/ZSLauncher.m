@@ -89,6 +89,7 @@
     [[NSUserDefaults standardUserDefaults] setBool:NO
 					    forKey:@"suspended"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    [selfe finalizeWiFi];
 }
 
 -(void)showStatus:(NSString*)aString

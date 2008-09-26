@@ -224,9 +224,16 @@ _DestroyApple8011 (void)
 {
     if ([[_netInfo objectForKey:@"killWifi"] boolValue] == YES)
     {
-	___SetWiFiEnabled(NO);
-	CFPreferencesSetAppValue(kKeyWifiNetwork, kCFBooleanFalse, kAppNetwork);
-	CFPreferencesAppSynchronize(kAppNetwork);
+	if (_handle == NULL)
+	{
+	    _InitApple80211();
+	}
+	if (_handle != NULL)
+	{
+	    ___SetWiFiEnabled(NO);
+	    CFPreferencesSetAppValue(kKeyWifiNetwork, kCFBooleanFalse, kAppNetwork);
+	    CFPreferencesAppSynchronize(kAppNetwork);
+	}
     }
     if (_handle)
     {
