@@ -174,7 +174,7 @@ _DestroyApple8011 (void)
 	    if ([bssid compare:[_netInfo objectForKey:@"BSSID"]] != NSOrderedSame)
 	    {
 		NSLog(@"- BSSID doesn't match (expected '%@').",
-		      [_netinfo objectForKey:@"BSSID"]);
+		      [_netInfo objectForKey:@"BSSID"]);
 		continue;
 	    }
 	}
