@@ -18,7 +18,10 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-*/
+   */
+
+#ifndef __ZSRELAY_H
+#define __ZSRELAY_H 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,7 +94,7 @@ typedef    u_int32_t    socklen_t;
 #endif
 
 #define version  "zselay 0.5.0 (C) 2008 (Rene.K)\n" \
-		 "based on srelay 0.4.6 (C) 2003/04/13 (Tomo.M)"
+  "based on srelay 0.4.6 (C) 2003/04/13 (Tomo.M)"
 
 #ifndef SYSCONFDIR
 # define SYSCONFDIR "/usr/local/etc"
@@ -153,13 +156,13 @@ extern int threading;
 
 #ifdef USE_THREAD
 # define MUTEX_LOCK(mutex) \
-    if (threading) { \
-      pthread_mutex_lock(&mutex); \
-    }
+  if (threading) { \
+    pthread_mutex_lock(&mutex); \
+  }
 # define MUTEX_UNLOCK(mutex) \
-    if (threading) { \
-      pthread_mutex_unlock(&mutex); \
-    }
+  if (threading) { \
+    pthread_mutex_unlock(&mutex); \
+  }
 #else
 # define MUTEX_LOCK(mutex)
 # define MUTEX_UNLOCK(mutex)
@@ -191,19 +194,23 @@ enum { norm=0, warn, crit };
 #define S5ACHAP       3
 #define S5ANOTACC     0xff
 
-struct bin_addr {            /* binary format of SOCKS address */
-  u_int8_t      atype;
-  union {
-    u_int8_t    ip4[4];   /* NBO */
-    struct {
-      u_int8_t  ip6[16];  /* NBO */
-      u_int32_t scope;
-    } _ip6;
-    struct {
-      u_int8_t  _nlen;
-      u_int8_t  _name[255];
-    } _fqdn;
-  } _addr;
+struct bin_addr
+{            /* binary format of SOCKS address */
+    u_int8_t      atype;
+    union
+      {
+	u_int8_t    ip4[4];   /* NBO */
+	struct
+	  {
+	    u_int8_t  ip6[16];  /* NBO */
+	    u_int32_t scope;
+	  } _ip6;
+	struct
+	  {
+	    u_int8_t  _nlen;
+	    u_int8_t  _name[255];
+	  } _fqdn;
+      } _addr;
 #define v4_addr   _addr.ip4
 #define v6_addr   _addr._ip6.ip6
 #define v6_scope  _addr._ip6.scope
@@ -211,23 +218,25 @@ struct bin_addr {            /* binary format of SOCKS address */
 #define fqdn      _addr._fqdn._name
 };
 
-struct rtbl {
-  struct bin_addr dest;       /* destination address */
-  int             mask;       /* destination address mask len */
-  u_int16_t       port_l;     /* port range low  (HBO) */
-  u_int16_t       port_h;     /* port range high (HBO)*/
-  struct bin_addr proxy;      /* proxy socks address */
-  u_int16_t       port;       /* proxy socks port (HBO) */
+struct rtbl
+{
+    struct bin_addr dest;       /* destination address */
+    int             mask;       /* destination address mask len */
+    u_int16_t       port_l;     /* port range low  (HBO) */
+    u_int16_t       port_h;     /* port range high (HBO)*/
+    struct bin_addr proxy;      /* proxy socks address */
+    u_int16_t       port;       /* proxy socks port (HBO) */
 };
 
-struct socks_req {
-  int      s;                 /* client socket */
-  int      req;               /* request CONN/BIND */
-  struct bin_addr dest;       /* destination address */
-  u_int16_t port;             /* destination port (host byte order) */
-  u_int8_t  u_len;            /* user name length (socks v4) */
-  char     user[255];         /* user name (socks v4) */ 
-  int      tbl_ind;           /* proxy table indicator */
+struct socks_req
+{
+    int      s;                 /* client socket */
+    int      req;               /* request CONN/BIND */
+    struct bin_addr dest;       /* destination address */
+    u_int16_t port;             /* destination port (host byte order) */
+    u_int8_t  u_len;            /* user name length (socks v4) */
+    char     user[255];         /* user name (socks v4) */ 
+    int      tbl_ind;           /* proxy table indicator */
 };
 
 #ifndef SIGFUNC_DEFINED
@@ -335,3 +344,6 @@ extern void proclist_drop __P((pid_t));
 /* auth-pwd.c */
 int auth_pwd_server __P((int));
 int auth_pwd_client __P((int, int));
+
+#endif /* __ZSRELAY_H */
+

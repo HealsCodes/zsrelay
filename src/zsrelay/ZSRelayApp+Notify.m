@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-*/
+   */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -25,23 +25,22 @@
 
 static void
 iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
-			  CFStringRef name, const void *object, CFDictionaryRef userInfo)
+			  CFStringRef name, const void *object,
+			  CFDictionaryRef userInfo)
 {
     if (observer != NULL)
-    {
-	[(ZSRelayApp*)observer handleNotification:(NSString*)name];
-    }
+      [(ZSRelayApp*)observer handleNotification:(NSString*)name];
 }
 
 @implementation ZSRelayApp (Notify)
--(void)registerNotifications
+	-(void)registerNotifications
 {
     const CFStringRef *ZSMsgList[] = {
-	&ZSMsgDoTerminate,
-	&ZSMsgDoReConfig,
-	&ZSMsgDoTrafficStats,
+      &ZSMsgDoTerminate,
+      &ZSMsgDoReConfig,
+      &ZSMsgDoTrafficStats,
 
-	NULL
+      NULL
     };
 
     _zsIPC = ZSInitMessagingFull(iphone_app_handle_notify, self, ZSMsgList);
@@ -55,17 +54,17 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 -(void)handleNotification:(NSString*)notification
 {
     if ([notification compare:(NSString*)ZSMsgDoTerminate] == NSOrderedSame)
-    {
+      {
 	NSLog(@"handleNotification: applicationWillTerminate");
 	[self applicationWillTerminate];
-    }
+      }
     else if ([notification compare:(NSString*)ZSMsgDoReConfig] == NSOrderedSame)
-    {
+      {
 	NSLog(@"handleNotification: applicationNeedsReConfigure");
 	[self applicationNeedsReConfigure];
-    }
+      }
     else if ([notification compare:(NSString*)ZSMsgDoTrafficStats] == NSOrderedSame)
-    {
+      {
 	FILE *statusFile = NULL;
 
 	long trafficIn = 0;
@@ -77,18 +76,16 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 
 	statusFile = fopen(ZSURLStatus, "w");
 	if (statusFile != NULL)
-	{
+	  {
 	    fprintf(statusFile, "%ld;%ld;%ld\n",
 		    trafficIn,
 		    trafficOut,
 		    connections);
 	    fclose(statusFile);
-	}
-    }
+	  }
+      }
     else
-    {
-	NSLog(@"handleNotification: ignoring '%@'", notification);
-    }
+      NSLog(@"handleNotification: ignoring '%@'", notification);
 }
 
 /* notification sounds */
@@ -98,23 +95,20 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     GSEventPlaySoundAtPath(@"/System/Library/Audio/UISounds/Tink.caf");
 #else
     if (_connectSound == 0)
-    {
+      {
 	CFURLRef path = CFURLCreateWithFileSystemPath(
-			    kCFAllocatorDefault,
-			    CFSTR("/System/Library/Audio/UISounds/Tink.caf"),
-			    kCFURLPOSIXPathStyle,
-			    false);
+						      kCFAllocatorDefault,
+						      CFSTR("/System/Library/Audio/UISounds/Tink.caf"),
+						      kCFURLPOSIXPathStyle,
+						      false);
 	AudioServicesCreateSystemSoundID(path, &_connectSound);
 	CFRelease(path);
 
 	NSLog(@"SystemSoundID: %d", _connectSound);
-    }
+      }
 
     AudioServicesPlaySystemSound(_connectSound);
 #endif
 }
 @end
-
-/* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :
-*/
 

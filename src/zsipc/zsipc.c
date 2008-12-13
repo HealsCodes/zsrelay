@@ -49,7 +49,8 @@ ZSInitMessaging (void)
 }
 
 ZSIPCRef
-ZSInitMessagingFull (CFNotificationCallback callback, void *observer, const CFStringRef **notifications)
+ZSInitMessagingFull (CFNotificationCallback callback, void *observer,
+		     const CFStringRef **notifications)
 {
     int i;
     struct _ZSIPCRef *ipcRef = NULL;
@@ -57,26 +58,26 @@ ZSInitMessagingFull (CFNotificationCallback callback, void *observer, const CFSt
     ipcRef = (struct _ZSIPCRef*)malloc(sizeof(struct _ZSIPCRef));
 
     if (ipcRef == NULL)
-    {
+      {
 	return NULL;
-    }
+      }
 
     memset(ipcRef, 0, sizeof(struct _ZSIPCRef));
     ipcRef->notifyRef = CFNotificationCenterGetDarwinNotifyCenter();
     ipcRef->observer  = (observer == NULL) ? ipcRef : observer;
 
     if (callback != NULL && notifications != NULL)
-    {
+      {
 	for (i = 0; notifications[i] != NULL; i++)
-	{
+	  {
 	    CFNotificationCenterAddObserver(ipcRef->notifyRef,
 					    ipcRef->observer,
 					    callback,
 					    *notifications[i],
 					    NULL,
 					    CFNotificationSuspensionBehaviorDeliverImmediately);
-	}
-    }
+	  }
+      }
     return ipcRef;
 }
 
@@ -84,9 +85,9 @@ void
 ZSDestroy (ZSIPCRef ipcRef)
 {
     if (ipcRef == NULL)
-    {
+      {
 	return;
-    }
+      }
 
     CFNotificationCenterRemoveEveryObserver(ipcRef->notifyRef, ipcRef->observer);
     free(ipcRef);
@@ -96,9 +97,9 @@ void
 ZSSendCommand (ZSIPCRef ipcRef, CFStringRef ipcCmd)
 {
     if (ipcRef == NULL)
-    {
+      {
 	return;
-    }
+      }
 
     CFNotificationCenterPostNotification(ipcRef->notifyRef,
 					 ipcCmd,
@@ -108,7 +109,8 @@ ZSSendCommand (ZSIPCRef ipcRef, CFStringRef ipcCmd)
 }
 
 void
-ZSPollTrafficStats (ZSIPCRef ipcRef, long *trafficIn, long *trafficOut, long *connections)
+ZSPollTrafficStats (ZSIPCRef ipcRef, long *trafficIn, long *trafficOut,
+		    long *connections)
 {
     FILE *statusFile = NULL;
     ipcRef->trafficIn   = 0;
@@ -120,29 +122,26 @@ ZSPollTrafficStats (ZSIPCRef ipcRef, long *trafficIn, long *trafficOut, long *co
 
     statusFile = fopen(ZSURLStatus, "r");
     if (statusFile != NULL)
-    {
+      {
 	fscanf(statusFile, " %ld ; %ld ; %ld ",
 	       &ipcRef->trafficIn,
 	       &ipcRef->trafficOut,
 	       &ipcRef->connections);
 
 	fclose(statusFile);
-    }
+      }
 
     if (trafficIn != NULL)
-    {
+      {
 	*trafficIn = ipcRef->trafficIn;
-    }
+      }
     if (trafficOut != NULL)
-    {
+      {
 	*trafficOut = ipcRef->trafficOut;
-    }
+      }
     if (connections != NULL)
-    {
+      {
 	*connections = ipcRef->connections;
-    }
+      }
 }
-
-/* vim: ai ft=c ts=8 sts=4 sw=4 fdm=marker noet :
-*/
 

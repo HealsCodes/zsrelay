@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-*/
+   */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -34,51 +34,56 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
- static ZSRelayApp *_sharedApp = nil;
+static ZSRelayApp *_sharedApp = nil;
 
 //From Nate True's dock application:
 static pid_t
-springboard_pid() {
+springboard_pid()
+{
     uint32_t		    i;
     size_t		    length;
     int32_t		    err, count;
     struct kinfo_proc	   *process_buffer;
     struct kinfo_proc      *kp;
-    int			    mib[ 3 ] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
+    int			    mib[3] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
     pid_t		    spring_pid;
     int			    loop;
 
     spring_pid = -1;
 
-    sysctl( mib, 3, NULL, &length, NULL, 0 );
+    sysctl(mib, 3, NULL, &length, NULL, 0);
 
     if (length == 0)
-	return -1;
+      return -1;
 
     process_buffer = (struct kinfo_proc *)malloc(length);
 
-    for ( i = 0; i < 60; ++i ) {
+    for (i = 0; i < 60; ++i)
+      {
 	// in the event of inordinate system load, transient sysctl() failures are
 	// possible.  retry for up to one minute if necessary.
-	if ( ! ( err = sysctl( mib, 3, process_buffer, &length, NULL, 0 ) ) ) break;
-	sleep( 1 );
-    }	
+	if (!(err = sysctl(mib, 3, process_buffer, &length, NULL, 0)))
+	  break;
 
-    if (err) {
+	sleep(1);
+      }	
+
+    if (err)
+      {
 	free(process_buffer);
 	return -1;
-    }
+      }
 
     count = length / sizeof(struct kinfo_proc);
 
     kp = process_buffer;
 
-    for (loop = 0; (loop < count) && (spring_pid == -1); loop++) {
-	if (!strcasecmp(kp->kp_proc.p_comm,"SpringBoard")) {
-	    spring_pid = kp->kp_proc.p_pid;
-	}
+    for (loop = 0; (loop < count) && (spring_pid == -1); loop++)
+      {
+	if (!strcasecmp(kp->kp_proc.p_comm,"SpringBoard"))
+	  spring_pid = kp->kp_proc.p_pid;
 	kp++;
-    }
+      }
 
     free(process_buffer);
 
@@ -93,7 +98,7 @@ springboard_uid()
     int32_t		err, count;
     struct kinfo_proc	*process_buffer;
     struct kinfo_proc   *kp;
-    int			mib[ 3 ] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
+    int			mib[3] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
     uid_t		spring_uid;
     int			loop;
 
@@ -102,32 +107,36 @@ springboard_uid()
     sysctl( mib, 3, NULL, &length, NULL, 0 );
 
     if (length == 0)
-	return -1;
+      return -1;
 
     process_buffer = (struct kinfo_proc *)malloc(length);
 
-    for ( i = 0; i < 60; ++i ) {
+    for (i = 0; i < 60; ++i)
+      {
 	// in the event of inordinate system load, transient sysctl() failures are
 	// possible.  retry for up to one minute if necessary.
-	if ( ! ( err = sysctl( mib, 3, process_buffer, &length, NULL, 0 ) ) ) break;
-	sleep( 1 );
-    }	
+	if (! (err = sysctl(mib, 3, process_buffer, &length, NULL, 0)))
+	  break;
 
-    if (err) {
+	sleep(1);
+      }	
+
+    if (err)
+      {
 	free(process_buffer);
 	return -1;
-    }
+      }
 
     count = length / sizeof(struct kinfo_proc);
 
     kp = process_buffer;
 
-    for (loop = 0; (loop < count) && (spring_uid == -1); loop++) {
-	if (!strcasecmp(kp->kp_proc.p_comm,"SpringBoard")) {
-	    spring_uid = kp->kp_eproc.e_pcred.p_ruid;
-	}
+    for (loop = 0; (loop < count) && (spring_uid == -1); loop++)
+      {
+	if (!strcasecmp(kp->kp_proc.p_comm,"SpringBoard"))
+	  spring_uid = kp->kp_eproc.e_pcred.p_ruid;
 	kp++;
-    }
+      }
 
     free(process_buffer);
 
@@ -139,9 +148,7 @@ void
 iphone_app_main (void)
 {
     while(springboard_pid() == -1)
-    {
-	sleep(4);
-    }
+      sleep(4);
 
     printf("Springboard uid: %i\n", springboard_uid());
 
@@ -151,9 +158,7 @@ iphone_app_main (void)
     [app applicationDidFinishLaunching:nil];
 
     while (1)
-    {
-	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.25, false);
-    }
+      CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.25, false);
 
     [pool release];
 }
@@ -163,9 +168,7 @@ iphone_app_handle_signals (int unused)
 {
     printf("iphone_app_handle_signal()\n");
     if ([ZSRelayApp sharedApp] != nil)
-    {
-	[[ZSRelayApp sharedApp] applicationWillTerminate];
-    }
+      [[ZSRelayApp sharedApp] applicationWillTerminate];
 
     cleanup();
     exit(0);
@@ -173,13 +176,15 @@ iphone_app_handle_signals (int unused)
 
 void
 iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
-			  CFStringRef name, const void *object, CFDictionaryRef userInfo)
+			  CFStringRef name, const void *object,
+			  CFDictionaryRef userInfo)
 {
     printf("iphone_app_handle_notify()\n");
     [(ZSRelayApp*)observer applicationWillTerminate];
 }
 
 @implementation ZSRelayApp
+
 +(ZSRelayApp*)sharedApp
 {
     return _sharedApp;
@@ -191,16 +196,14 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     _urlConnection = nil;
 
     if ([ZSRelayApp sharedApp] == nil)
-    {
-	_sharedApp = self;
-    }
+      _sharedApp = self;
 
     /* register signal handling */
-/*
-    signal(SIGTERM, iphone_app_handle_signals);
-    signal(SIGKILL, iphone_app_handle_signals);
-    signal(SIGSEGV, iphone_app_handle_signals);
-*/
+    /*
+       signal(SIGTERM, iphone_app_handle_signals);
+       signal(SIGKILL, iphone_app_handle_signals);
+       signal(SIGSEGV, iphone_app_handle_signals);
+       */
     /* register for darwin notifications */
     [self registerNotifications];
 
@@ -221,10 +224,10 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     [self setNetworkKeepAlive:NO];
 
     if ([self loadSettings] == NO)
-    {
+      {
 	NSLog(@"failed to load settings!");
 	return;
-    }
+      }
     NSLog(@"got settings.");
 
     NSLog(@"use status icons: %d", [self displayStatusIcons]);
@@ -232,41 +235,34 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 
     NSLog(@"use network keep alive: %d", [self networkKeepAlive]);
     if ([self networkKeepAlive] == YES)
-    {
+      {
 	NSLog(@"registring io hook...");
 	if ([self setNetworkKeepAlive:YES] == YES)
-	{
+	  {
 	    NSLog(@"hook registred");
 	    [self showIcon:@"ZSRelayInsomnia"];
-	}
+	  }
 	else
-	{
-	    NSLog(@"failed to register hook");
-	}
-    }
+	  NSLog(@"failed to register hook");
+      }
     if ([self sshOnLaunch] == YES)
-    {
+      {
 	FILE *fd = NULL;
 	fd = popen("/usr/sbin/zscmd ssh-on", "r");
 
 	if (fd != NULL)
-	{
-	    fclose(fd);
-	}
-    }
+	  fclose(fd);
+      }
 
     if ([[NetworkController sharedInstance] isEdgeUp] == YES)
-    {
+      {
 	_connected = YES;
+
 	if ([self networkKeepAlive] == YES)
-	{
-	    [self showIcon:@"ZSRelayInsomnia"];
-	}
+	  [self showIcon:@"ZSRelayInsomnia"];
 	else
-	{
-	    [self showIcon:@"ZSRelay"];
-	}
-    }
+	  [self showIcon:@"ZSRelay"];
+      }
 }
 
 -(void)applicationWillTerminate
@@ -278,18 +274,13 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     [self unloadSettings];
 
     if ([self sshOnLaunch] == YES)
-    {
+      {
 	FILE *fd = NULL;
 	fd = popen("/usr/sbin/zscmd ssh-off", "r");
 
 	if (fd != NULL)
-	{
-	    fclose(fd);
-	}
-    }
+	  fclose(fd);
+      }
 }
 @end
-
-/* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :
-*/
 

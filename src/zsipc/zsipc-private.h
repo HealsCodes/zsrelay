@@ -17,8 +17,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef ZSIPC_PRIVATE_H
-#define ZSIPC_PRIVATE_H
+#ifndef __ZSIPC_PRIVATE_H
+#define __ZSIPC_PRIVATE_H 1
 
 #include "zsipc.h"
 
@@ -27,7 +27,5 @@ extern const CFStringRef ZSMsgDoTrafficStats;
 ZSIPCRef ZSInitMessagingFull (CFNotificationCallback callback, void *observer,
 			      const CFStringRef **notifications);
 
-#endif
-/* vim: ai ft=c ts=8 sts=4 sw=4 fdm=marker noet :
-*/
+#endif /* __ZSIPC_PRIVATE_H */
 

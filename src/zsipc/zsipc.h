@@ -17,8 +17,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef ZSIPC_H
-#define ZSIPC_H
+#ifndef __ZSIPC_H
+#define __ZSIPC_H 1
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -35,7 +35,5 @@ void ZSDestroy (ZSIPCRef ipcRef);
 void ZSSendCommand (ZSIPCRef ipcRef, CFStringRef ipcCmd);
 void ZSPollTrafficStats (ZSIPCRef ipcRef, long *trafficIn, long *trafficOut, long *connections);
 
-#endif
-/* vim: ai ft=c ts=8 sts=4 sw=4 fdm=marker noet :
-*/
+#endif /* __ZSIPC_H */
 

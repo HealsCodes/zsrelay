@@ -19,6 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
+#ifndef __V6DEFS_H
+#define __V6DEFS_H 1
 
 #ifndef AF_INET6
 #define AF_INET6        24
@@ -27,10 +29,13 @@
 #ifndef PF_INET6
 #define PF_INET6        AF_INET6
 #endif
-struct in6_addr {
+struct in6_addr
+{
   u_int8_t        s6_addr[16];
 };
-struct sockaddr_in6 {
+
+struct sockaddr_in6
+{
 #ifdef  HAVE_SOCKADDR_SA_LEN
   u_int8_t        sin6_len;       /* length of this struct */
   u_int8_t        sin6_family;    /* AF_INET6 */
@@ -42,6 +47,7 @@ struct sockaddr_in6 {
   struct in6_addr sin6_addr;      /* IPv6 address */
   u_int32_t       sin6_scope_id;  /* set of interfaces for a scope */
 };
+
 #ifndef IN6ADDR_ANY_INIT
 #define IN6ADDR_ANY_INIT        {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
 #endif
@@ -49,7 +55,8 @@ struct sockaddr_in6 {
 #define __SS_MAXSIZE 128
 #define __SS_ALLIGSIZE (sizeof (long))
 
-struct sockaddr_storage {
+struct sockaddr_storage
+{
 #ifdef  HAVE_SOCKADDR_SA_LEN
   u_int8_t        ss_len;       /* address length */
   u_int8_t        ss_family;    /* address family */
@@ -64,3 +71,5 @@ struct sockaddr_storage {
 #endif
 };
 #endif
+#endif /* __V6DEFS_H */
+

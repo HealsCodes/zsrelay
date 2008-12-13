@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-*/
+   */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -29,34 +29,36 @@
 @implementation LocalizedListController
 - (NSArray *)localizedSpecifiersForSpecifiers:(NSArray *)s {
 
-    int i;
-    for(i=0; i<[s count]; i++)
+  int i;
+  for(i=0; i<[s count]; i++)
     {
-	if([[s objectAtIndex: i] name])
+      if([[s objectAtIndex: i] name])
 	{
-	    [[s objectAtIndex: i] setName:[[self bundle] localizedStringForKey:[[s objectAtIndex:i] name]
-									 value:[[s objectAtIndex:i] name]
-									 table:nil]];
+	  [[s objectAtIndex: i] setName:[[self bundle]
+	          localizedStringForKey:[[s objectAtIndex:i] name]
+	                          value:[[s objectAtIndex:i] name]
+	                          table:nil]];
 	}
-	if([[s objectAtIndex: i] titleDictionary])
+      if([[s objectAtIndex: i] titleDictionary])
 	{
-	    NSMutableDictionary *newTitles = [[NSMutableDictionary alloc] init];
-	    for(NSString *key in [[s objectAtIndex:i] titleDictionary])
+	  NSMutableDictionary *newTitles = [[NSMutableDictionary alloc] init];
+	  for(NSString *key in [[s objectAtIndex:i] titleDictionary])
 	    {
-		[newTitles setObject:[[self bundle] localizedStringForKey:[[[s objectAtIndex:i] titleDictionary] objectForKey:key]
-								    value:[[[s objectAtIndex:i] titleDictionary] objectForKey:key]
-								    table:nil] forKey:key];
+	      [newTitles setObject:[[self bundle]
+		localizedStringForKey:[[[s objectAtIndex:i] titleDictionary] objectForKey:key]
+		                value:[[[s objectAtIndex:i] titleDictionary] objectForKey:key]
+		                table:nil] forKey:key];
 	    }
-	    [[s objectAtIndex:i] setTitleDictionary:[newTitles autorelease]];
+	  [[s objectAtIndex:i] setTitleDictionary:[newTitles autorelease]];
 	}
     }
-    return s;
+  return s;
 }
 
 - (id)navigationTitle {
-    return [[self bundle] localizedStringForKey:_title
-					  value:_title
-					  table:nil];
+  return [[self bundle] localizedStringForKey:_title
+                                        value:_title
+                                        table:nil];
 }
 @end
 
@@ -88,7 +90,7 @@
 -(NSArray*)specifiers
 {
     NSArray *s = [self loadSpecifiersFromPlistName:@"ZSRelay"
-					    target:self];
+                                            target:self];
 
     s = [self localizedSpecifiersForSpecifiers:s];
     return s;
@@ -106,32 +108,36 @@
 {
     FILE *child_fd = NULL;
 
-    [self setPreferenceValue:value specifier:specifier];
+    [self setPreferenceValue:value
+                   specifier:specifier];
+
     [[NSUserDefaults standardUserDefaults] synchronize];
 
     if (value == kCFBooleanTrue)
-    {
+      {
 	NSLog(@"enabling zsrelay...");
 	child_fd = popen("/usr/sbin/zscmd start", "r");
 	if (child_fd != NULL)
-	{
+	  {
 	    fclose(child_fd);
-	}
-    }
+	  }
+      }
     else
-    {
+      {
 	NSLog(@"disabling zsrelay...");
 	child_fd = popen("/usr/sbin/zscmd stop", "r");
 	if (child_fd != NULL)
-	{
+	  {
 	    fclose(child_fd);
-	}
-    }
+	  }
+      }
 }
 
 -(void)setPrefVal:(id)value specifier:(id)specifier
 {
-    [self setPreferenceValue:value specifier:specifier];
+    [self setPreferenceValue:value
+                   specifier:specifier];
+
     [[NSUserDefaults standardUserDefaults] synchronize];
 
     [self triggerReConfig];
@@ -151,10 +157,10 @@
     _zsIPC = ZSInitMessaging();
 
     [NSTimer scheduledTimerWithTimeInterval:5.0
-				     target:self
-				   selector:@selector(pollTrafficStats:)
-				   userInfo:nil
-				    repeats:YES];
+                                     target:self
+                                   selector:@selector(pollTrafficStats:)
+                                   userInfo:nil
+                                   repeats:YES];
     return self;
 }
 
@@ -168,7 +174,8 @@
 -(NSArray*)specifiers
 {
     NSArray *s = [self loadSpecifiersFromPlistName:@"advanced"
-					    target:self];
+                                            target:self];
+
     s = [self localizedSpecifiersForSpecifiers:s];
     return s;
 }
@@ -203,25 +210,25 @@
     double tOut = 0.0;
 
     if (trafficStat >= (1024*1024*1024))
-    {
+      {
 	strcpy(suffix, "Gb");
 	tOut = trafficStat / (1024.0*1024.0*1024.0);
-    }
+      }
     else if (trafficStat >= (1024*1024))
-    {
+      {
 	strcpy(suffix, "Mb");
 	tOut = trafficStat / (1024.0*1024.0);
-    }
+      }
     else if (trafficStat >= 1024)
-    {
+      {
 	strcpy(suffix, "Kb");
 	tOut = trafficStat / 1024.0;
-    }
+      }
     else
-    {
+      {
 	strcpy(suffix, "b");
 	tOut = trafficStat;
-    }
+      }
 
     return [NSString stringWithFormat:@"%.1f%s", tOut, suffix];
 }
@@ -237,12 +244,9 @@
     NSLog(@"enabling zsrelay...");
     child_fd = popen("/usr/sbin/zscmd install-plugin", "r");
     if (child_fd != NULL)
-    {
-        fclose(child_fd);
-    }
+      {
+	fclose(child_fd);
+      }
 }
 @end
-
-/* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :
-*/
 

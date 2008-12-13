@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-*/
+   */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -23,51 +23,52 @@
 
 #import "ZSRelayApp.h"
 
+#define PREF_SUITE @"org.bitspin.zsrelay"
+
 @implementation ZSRelayApp (Settings)
 
--(BOOL)loadSettings
+	-(BOOL)loadSettings
 {
-    [[NSUserDefaults standardUserDefaults] addSuiteNamed:@"org.bitspin.zsrelay"];
-    NSDictionary *prefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"org.bitspin.zsrelay"];
+    [[NSUserDefaults standardUserDefaults] addSuiteNamed:PREF_SUITE];
+    NSDictionary *prefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:PREF_SUITE];
 
     if (prefs == nil)
-    {
+      {
 	NSLog(@"Storing new user defaults");
 
 	[[NSUserDefaults standardUserDefaults] setObject:@"http://bitspin.org"
-						  forKey:@"keepAliveURI"];
+	                                          forKey:@"keepAliveURI"];
 
 	[[NSUserDefaults standardUserDefaults] setBool:YES
-						forKey:@"sshOnLaunch"];
+	                                        forKey:@"sshOnLaunch"];
 
 	[[NSUserDefaults standardUserDefaults] setBool:NO
-						forKey:@"networkKeepAlive"];
+	                                        forKey:@"networkKeepAlive"];
 
 	[[NSUserDefaults standardUserDefaults] setBool:YES
-						forKey:@"displayStatusIcons"];
+	                                        forKey:@"displayStatusIcons"];
 
 	if ([[NSUserDefaults standardUserDefaults] synchronize] == NO)
-	{
-	    return NO;
-	}
+	  return NO;
 
-	prefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"org.bitspin.zsrelay"];
+	prefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:PREF_SUITE];
 	return prefs != nil;
-    }
+      }
     else
-    {
-	NSLog(@"Got user defaults.");
-    }
+      NSLog(@"Got user defaults.");
+
     [[NSUserDefaults standardUserDefaults] setBool:YES
-					    forKey:@"zsrelayEnabled"];
+                                            forKey:@"zsrelayEnabled"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+
     return YES;
 }
 
 -(void)unloadSettings
 {
     [[NSUserDefaults standardUserDefaults] setBool:NO
-					    forKey:@"zsrelayEnabled"];
+                                            forKey:@"zsrelayEnabled"];
+
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -76,13 +77,13 @@
     NSString *theURI = [[NSUserDefaults standardUserDefaults] stringForKey:@"keepAliveURI"];
 
     if (theURI == nil)
-    {
+      {
 	[[NSUserDefaults standardUserDefaults] setObject:@"http://bitspin.org"
-						  forKey:@"keepAliveURI"];
+	                                          forKey:@"keepAliveURI"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 
 	return [self keepAliveURI];
-    }
+      }
 
     return theURI;
 }
@@ -103,7 +104,4 @@
 }
 
 @end
-
-/* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :
-*/
 

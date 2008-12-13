@@ -17,8 +17,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef ZSRELAY_SETTINGS_H
-#define ZSRELAY_SETTINGS_H
+#ifndef __ZSRELAY_SETTINGS_H
+#define __ZSRELAY_SETTINGS_H 1
 
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
@@ -39,7 +39,8 @@
 -(id)navigationTitle;
 @end
 
-@interface LocalizedItemsController : PSListItemsController {
+@interface LocalizedItemsController : PSListItemsController
+{
 }
 -(NSArray *)specifiers;
 @end
@@ -84,7 +85,7 @@
 -(NSString*)getFormatedTraffic:(long)trafficStat;
 @end
 
-#endif
+#endif /* __ZSRELAY_SETTINGS_H 1 */
 
 /* vim: ai ts=8 sts=4 sw=4 fdm=marker noet :
 */

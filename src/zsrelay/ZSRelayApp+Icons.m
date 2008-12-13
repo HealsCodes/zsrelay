@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-*/
+   */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -24,6 +24,7 @@
 #import "ZSRelayApp.h"
 
 @implementation ZSRelayApp (Icons)
+
 -(void)showIcon:(NSString*)iconName
 {
     [self showIcon:iconName
@@ -34,46 +35,39 @@
 {
     NSMutableString *fullIconName = [iconName mutableCopy];
     if ([self displayStatusIcons] == NO)
-    {
+      {
 	[fullIconName release];
 	return;
-    }
+      }
 
     if (_connected == NO)
-    {
-	[fullIconName appendString:@"NOP"];
-    }
+      [fullIconName appendString:@"NOP"];
 
     if (exclusive == YES)
-    {
-	[self removeAllIcons];
-    }
+      [self removeAllIcons];
+
     if ([self respondsToSelector:@selector(addStatusBarImageNamed:removeOnAbnormalExit:)] == YES)
-    {
-	[self addStatusBarImageNamed:fullIconName
-		removeOnAbnormalExit:YES];
-    }
+      [self addStatusBarImageNamed:fullIconName
+	removeOnAbnormalExit:YES];
     else
-    {
-	[self addStatusBarImageNamed:fullIconName
-			removeOnExit:NO];
-    }
+      [self addStatusBarImageNamed:fullIconName
+	removeOnExit:NO];
+
     [fullIconName release];
 }
 
 -(void)removeIcon:(NSString*)iconName
 {
     NSMutableString *fullIconName = [iconName mutableCopy];
+
     if ([self displayStatusIcons] == NO)
-    {
+      {
 	[fullIconName release];
 	return;
-    }
+      }
 
     if (_connected == NO)
-    {
-	[fullIconName appendString:@"NOP"];
-    }
+      [fullIconName appendString:@"NOP"];
 
     NSLog(@"DisplayIcon: %@", fullIconName);
     [self removeStatusBarImageNamed:fullIconName];
@@ -88,6 +82,4 @@
     [self removeStatusBarImageNamed:@"ZSRelayInsomniaNOP"];
 }
 @end
-/* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :
-*/
 
