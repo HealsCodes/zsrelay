@@ -56,11 +56,15 @@
 		</dict>
 		<dict>
 			<key>cell</key>
-			<string>PSLinkListCell</string>
-			<key>detail</key>
-			<string>NetworkSettingsController</string>
+			<string>PSSwitchCell</string>
 			<key>label</key>
-			<string>WiFi Settings</string>
+			<string>Hook Extended Prefs</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>org.bitspin.zsrelay</string>
+			<key>key</key>
+			<string>hookExtPrefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -79,17 +83,29 @@
 			<integer>1</integer>
 		</dict>
 		<dict>
+			<key>action</key>
+			<string>prefplugButton:</string>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>isDestructive</key>
+			<false/>
+			<key>label</key>
+			<string>Refresh Plugin</string>
+		</dict>
+		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>isStaticText</key>
 			<true/>
 		</dict>
+<!--
 		<dict>
 			<key>cell</key>
 			<string>PSTitleValueCell</string>
 			<key>label</key>
 			<string>This URL will be polled to keep your connection happy.</string>
 		</dict>
+-->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>

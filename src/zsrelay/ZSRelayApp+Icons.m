@@ -48,10 +48,16 @@
     {
 	[self removeAllIcons];
     }
-
-    [self addStatusBarImageNamed:fullIconName
-	    removeOnAbnormalExit:YES];
-
+    if ([self respondsToSelector:@selector(addStatusBarImageNamed:removeOnAbnormalExit:)] == YES)
+    {
+	[self addStatusBarImageNamed:fullIconName
+		removeOnAbnormalExit:YES];
+    }
+    else
+    {
+	[self addStatusBarImageNamed:fullIconName
+			removeOnExit:NO];
+    }
     [fullIconName release];
 }
 

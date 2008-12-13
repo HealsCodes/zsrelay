@@ -12,18 +12,19 @@ chmod +s /Library/ZSRelay/ZSRelay.app/zsrelay
 /usr/sbin/zscmd install-plugin
 
 cat - <<EOS
--------------------------------------------------
-zsrelay 0.5.0 - beta
--------------------------------------------------
+------------------------------------------
+             zserlay 0.5.0
+------------------------------------------
 
-zsrelay should be able to life side by side
-with xsrelay bit it is suggested to choose one
-of them and stick with it.
+This update to zsrelay introduces support for
+Extended Prefs. To integrate zsrelay into
+Extended Prefs you need to follow these steps:
 
-If you use BossPrefs you may want to install the
-zrelay control from the System/ category.
+- Disable Extended Prefs
+- Switch to zsrelay-settings "advanced" tab
+- Activate the "Hook Extended Prefs" switch
+- Tapp "Refresh Plugin"
+- Reenable Extenden Prefs
 
-If you don't use BossPrefs you can configure zsrelay
-from within Preferences.app.
 EOS
 

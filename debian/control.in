@@ -4,20 +4,17 @@ Maintainer: Rene Koecher (shirk) <shirk@bitspin.org>
 Standards-Version: 2.1.2.2
 
 Package: org.bitspin.zsrelay@IPHONE_PKG_SUFFIX@
-Version: 0.5.0-@IPHONE_ARCH_SUFFIX@8
+#Version: 0.5.0-@IPHONE_ARCH_SUFFIX@9
 Architecture: @IPHONE_OS_ARCH@
 Description: zsrelay is an extended port of srelay.
  To put it short zsrelay is tuned for the iPhone.
  It offers support for:
- - connection keep alive
- - network (EDGE) keep alive
+ - connection keep alive (aka. insomnia mode)
+ - network keep alive (keep EDGE connected)
  - automatic start/stop of ssh daemon
  - integration into Preferences.app
  - live trafic monitoring in preferences
  - configurable status icons
- In additian to this the version for firmware 1.1.x
- contains a DNS fix suggested by Jay Freeman (saurik)
- - see http://saurik.com/id/7.
 Name: zsrelay
 Homepage: http://bitspin.org/
 Recommends: org.bitspin.zsrelay-control

@@ -66,13 +66,48 @@ main (int argc, char **argv)
 	}
 	else if(strncmp("install-plugin", argv[1], 14) == 0)
 	{
+	    #define kKeyHookExtPrefs CFSTR("hookExtPrefs")
+	    #define kAppZSRelay      CFSTR("org.bitspin.zsrelay")
+
+	    long val = 0;
+	    CFNumberRef hookExtPrefs = NULL;
+
+	    // no I'm no proud of this.. but it works for now
+	    system("cp /var/mobile/Library/Preferences/org.bitspin.zsrelay.plist /var/root/Library/Preferences/");
+
+	    hookExtPrefs = CFPreferencesCopyAppValue(kKeyHookExtPrefs, kAppZSRelay);
+
+	    if (hookExtPrefs == NULL)
+	    {
+		NSLog(@"Unable to cross read hookExtPrefs setting!");
+		val = 0;
+	    }
+	    else
+	    {
+		(void)CFNumberGetValue(hookExtPrefs, kCFNumberIntType, &val);
+		CFRelease(hookExtPrefs);
+	    }
+
 	    insertPrefBundle(@"/Applications/Preferences.app/Settings-iPhone.plist");
 	    insertPrefBundle(@"/Applications/Preferences.app/Settings-iPod.plist");
+
+	    if (val == 1)
+	    {
+		insertPrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPhone.plist");
+		insertPrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPod.plist");
+	    }
+	    else
+	    {
+		removePrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPhone.plist");
+		removePrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPod.plist");
+	    }
 	}
 	else if(strncmp("remove-plugin", argv[1], 13) == 0)
 	{
 	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPhone.plist");
 	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPod.plist");
+	    removePrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPhone.plist");
+	    removePrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPod.plist");
 	}
 	if (strncmp("ssh-on", argv[1], 7) == 0)
 	{

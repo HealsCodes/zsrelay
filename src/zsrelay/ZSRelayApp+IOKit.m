@@ -121,9 +121,11 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     }
 
     messagesSoFar++;
+    NSLog(@"handlePMMessage: messagesSoFar: %d", messagesSoFar);
 
     if (messagesSoFar == 20) /* one message each 30 seconds */
     {
+	NSLog(@"handlePMMessage: sending connectionKeepAlive", messagesSoFar);
 	[self connectionKeepAlive];
 	messagesSoFar = 0;
     }

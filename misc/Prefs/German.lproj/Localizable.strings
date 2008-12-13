@@ -5,7 +5,7 @@
 "Enable zsrelay" = "Proxy aktivieren";
 
 /* Enable/Disable status icons */
-"Show Icons" = "Status-Symbole";
+"Show Icons" = "Status-Icons (pre 2.2)";
 
 /* Enable/Disable network Keep alive */
 "Insomnia mode" = "Insomnia-Modus";
@@ -46,33 +46,9 @@
 /* URL for keep alive pinging - description */
 "This URL will be polled to keep your connection happy." = "Diese URL wird zum Aufrechterhalten der Internetverbindung genutzt.";
 
-/* Network setup */
-"Network setup" = "Netzwerk-Parameter";
+/* "Hook Extended Prefs" */
+"Hook Extended Prefs" = "Extended Prefs Add-in";
 
-/* Network name: ESSID */
-"Name" = "Name";
-
-/* Network password */
-"Password" = "Passwort";
-
-/* Network encrytion */
-"Security" = "Verschlüsselung";
-
-/* No encrytion */
-"None" = "keine";
-
-/* WEP encryption */
-"WEP" = "WEP";
-
-/* WPA encryption */
-"WPA" = "WPA";
-
-/* Auto WiFi disabler */
-"Automatic WiFi on/off" = "WiFi auto an/aus";
-
-/* factory defaults */
-"Reset" = "Reset";
-
-/* WiFi Settings (title) */
-"WiFi Settings" = "WiFi Konfiguration";
+/* Refresh prefs plugin */
+"Refresh Plugin" = "Plugin-Refresh";
 

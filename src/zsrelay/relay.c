@@ -106,7 +106,7 @@ void readn(rlyinfo *ri)
     ri->nread = recvfrom(ri->from, ri->buf, ri->nr, MSG_OOB, NULL, 0);
   }
   if (ri->nread < 0) {
-    msg_out(warn, "read: %m");
+    msg_out(warn, "read: %m\n");
   }
 }
 
@@ -119,7 +119,7 @@ void writen(rlyinfo *ri)
     ri->nwritten = sendto(ri->to, ri->buf, ri->nw, MSG_OOB, NULL, 0);
   }
   if (ri->nwritten <= 0) {
-    msg_out(warn, "write: %m");
+    msg_out(warn, "write: %m\n");
   }
 }
 
@@ -159,7 +159,7 @@ int validate_access(char *client_addr, char *client_name)
 #endif
 
   if (stat < 1) {
-    msg_out(warn, "%s[%s] access denied.", client_name, client_addr);
+    msg_out(warn, "%s[%s] access denied.\n", client_name, client_addr);
   }
 
   return stat;
@@ -347,7 +347,7 @@ int serv_loop()
     n = select(maxsock+1, &readable, 0, 0, 0);
     if (n <= 0) {
       if (n < 0 && errno != EINTR) {
-        msg_out(warn, "select: %m");
+        msg_out(warn, "select: %m\n");
       }
       MUTEX_UNLOCK(mutex_select);
       continue;
@@ -359,13 +359,13 @@ int serv_loop()
       /* handle any queued signal flags */
       if (FD_ISSET(sig_queue[0], &readable)) {
         if (ioctl(sig_queue[0], FIONREAD, &i) != 0) {
-          msg_out(crit, "ioctl: %m");
+          msg_out(crit, "ioctl: %m\n");
           exit(-1);
         }
         while (--i >= 0) {
           char c;
           if (read(sig_queue[0], &c, 1) != 1) {
-            msg_out(crit, "read: %m");
+            msg_out(crit, "read: %m\n");
             exit(-1);
           }
           switch(c) {
@@ -410,7 +410,7 @@ int serv_loop()
 	; /* ignore */
       } else {
 	/* real accept error */
-	msg_out(warn, "accept: %m");
+	msg_out(warn, "accept: %m\n");
       }
       MUTEX_UNLOCK(mutex_select);
       continue;
@@ -421,7 +421,7 @@ int serv_loop()
     if ( !threading ) {
 #endif
       if (max_child > 0 && cur_child >= max_child) {
-	msg_out(warn, "child: cur %d; exeedeing max(%d)",
+	msg_out(warn, "child: cur %d; exeedeing max(%d)\n",
 		          cur_child, max_child);
 	close(cs);
 	continue;
@@ -438,9 +438,9 @@ int serv_loop()
       error = getnameinfo((struct sockaddr *)&cl, len,
 			  cl_name, sizeof(cl_name),
 			  NULL, 0, 0);
-      msg_out(norm, "%s[%s] connected", cl_name, cl_addr);
+      msg_out(norm, "%s[%s] connected\n", cl_name, cl_addr);
     } else {
-      msg_out(norm, "%s connected", cl_addr);
+      msg_out(norm, "%s connected\n", cl_addr);
       strncpy(cl_name, cl_addr, sizeof(cl_name));
     }
 
@@ -528,7 +528,7 @@ int log_transfer(loginfo *li)
 		      prs_port, sizeof(prs_port),
 		      NI_NUMERICHOST|NI_NUMERICSERV);
 
-  msg_out(norm, "%s:%s-%s/%s-%s:%s %u(%u/%u) %u.%06u",
+  msg_out(norm, "%s:%s-%s/%s-%s:%s %u(%u/%u) %u.%06u\n",
 	  prc_ip, prc_port, myc_port,
 	  mys_port, prs_ip, prs_port,
 	  li->bc, li->upl, li->dnl,

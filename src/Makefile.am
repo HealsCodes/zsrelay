@@ -1,5 +1,5 @@
 if IPHONE_OS
-SUBDIRS = zsipc zsrelay zscmd prefplug zslauncher
+SUBDIRS = zsipc zsrelay zscmd prefplug
 else
 SUBDIRS = zsrelay
 endif

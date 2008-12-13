@@ -230,28 +230,17 @@
 {
     return [NSString stringWithFormat:@"%ld", _connections];
 }
-
-@end
-
-@implementation NetworkSettingsController
-
--(id)initForContentSize:(struct CGSize)size 
+-(void)prefplugButton:(id)sender
 {
-    self = [super initForContentSize:size];
-    return self;
-}
+    FILE *child_fd = NULL;
 
--(NSArray*)specifiers
-{
-    NSArray *s = [self loadSpecifiersFromPlistName:@"network"
-					    target:self];
-    s = [self localizedSpecifiersForSpecifiers:s];
-    return s;
+    NSLog(@"enabling zsrelay...");
+    child_fd = popen("/usr/sbin/zscmd install-plugin", "r");
+    if (child_fd != NULL)
+    {
+        fclose(child_fd);
+    }
 }
--(void)factoryDefaultsButton:(id)sender
-{
-}
-
 @end
 
 /* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :
