@@ -53,6 +53,7 @@
 #if IPHONE_OS_RELEASE >= 2
     NSMutableArray *_pluginBundles;
 #endif
+    NSArray *_cachedSpecifiers;
 }
 
 -(id)initForContentSize:(struct CGSize)size;

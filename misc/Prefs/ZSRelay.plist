@@ -12,7 +12,7 @@
 			<key>cell</key>
 			<string>PSSwitchCell</string>
 			<key>label</key>
-			<string>Enable zsrelay</string>
+			<string>ID_ENABLE_ZSRELAY</string>
 			<key>icon</key>
 			<string>pref_zsrelay.png</string>
 			<key>default</key>
@@ -28,7 +28,7 @@
 			<key>cell</key>
 			<string>PSSwitchCell</string>
 			<key>label</key>
-			<string>Insomnia mode</string>
+			<string>ID_ENABLE_INSOMNIA</string>
 			<key>icon</key>
 			<string>pref_insomnia.png</string>
 			<key>alternateColors</key>
@@ -46,7 +46,7 @@
 			<key>cell</key>
 			<string>PSSwitchCell</string>
 			<key>label</key>
-			<string>SSH on launch</string>
+			<string>ID_SSH_QUICKLAUNCH</string>
 			<key>icon</key>
 			<string>pref_ssh.png</string>
 			<key>alternateColors</key>
@@ -70,7 +70,7 @@
 			<key>cell</key>
 			<string>PSTitleValueCell</string>
 			<key>label</key>
-			<string>Please note that Insomnia mode will drain your battery.</string>
+			<string>ID_INSOMNIA_BATTERY_WARNING</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -82,13 +82,13 @@
 			<key>detail</key>
 			<string>AdvancedController</string>
 			<key>label</key>
-			<string>Advanced</string>
+			<string>ID_LINK_ADVANCED</string>
 		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>Powered by zsrelay</string>
+			<string>ID_ZSRELAY_PROMO</string>
 		</dict>
 		<dict>
 			<key>action</key>
@@ -98,7 +98,7 @@
 			<key>isDestructive</key>
 			<true/>
 			<key>label</key>
-			<string>Support zsrelay</string>
+			<string>ID_BUTTON_SUPPORT_ZSRELAY</string>
 		</dict>
 		<dict>
 			<key>cell</key>

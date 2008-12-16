@@ -1,26 +1,39 @@
-﻿/* zsrelay + iPhoneModem */
-"zsrelay" = "iPhoneModem";
+﻿/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * Keys below can be hidden by plugin bundles.
+ * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
 
 /* Enable/Disable zsrelay */
-"Enable zsrelay" = "Enable Proxy";
-
-/* Enable/Disable status icons */
-"Show Icons" = "Show Icons (pre 2.2)";
+"ID_ENABLE_ZSRELAY" = "Enable Proxy";
 
 /* Enable/Disable network Keep alive */
-"Insomnia mode" = "Insomnia mode";
+"ID_ENABLE_INSOMNIA" = "Insomnia mode";
+
+/* launch ssh along with zsrelay */
+"ID_SSH_QUICKLAUNCH" = "SSH on launch";
 
 /* battery notice */
- "Please note that Insomnia mode will drain your battery." = "Please note that Insomnia mode will drain your battery.";
+ "ID_INSOMNIA_BATTERY_WARNING" = "Please note that Insomnia mode will drain your battery.";
 
 /* advanced settings */
-"Advanced" = "Advanced";
+"ID_LINK_ADVANCED" = "Advanced";
 
-/* Whoohoo */
-"Powered by zsrelay" = "Powered by zsrelay";
+/* Whoohoo (powered by zsrelay)*/
+"ID_ZSRELAY_PROMO" = "Powered by zsrelay";
 
-/* support */
-"Support zsrelay" = "Support zsrelay";
+/* support zsrelay button*/
+"ID_BUTTON_SUPPORT_ZSRELAY" = "Support zsrelay";
+
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * Keys below have to be translated but can not
+ * be disabled by plugin bundles.
+ * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ */
+
+/* zsrelay + iPhoneModem */
+"zsrelay" = "iPhoneModem";
+
+/* Enable/Disable status icons */
+"Show Icons" = "Show Icons";
 
 /* network statistics */
 "Network stats" = "Network stats";
@@ -36,9 +49,6 @@
 
 /* connectivity settings */
 "Tweaks" = "Tweaks";
-
-/* launch ssh along with zsrelay */
-"SSH on launch" = "SSH on launch";
 
 /* URL for keep alive pinging */
 "Keep alive URL" = "Keep alive URL";

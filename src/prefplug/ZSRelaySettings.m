@@ -67,6 +67,7 @@
                                         table:nil];
 }
 
+#if IPHONE_OS_RELEASE >= 2
 -(NSArray*)updateSpecifiers:(NSArray*)mySpecifiers withBundles:(NSArray*)bundleList
 {
 #define PSGROUP_CELLID    0
@@ -74,6 +75,7 @@
 
     NSMutableArray *s = [mySpecifiers mutableCopy];
 
+    /* first walk - insert plugin bundles into desired locations */
     for (NSBundle *bundle in bundleList)
       {
 	int offset = -1;
@@ -113,20 +115,47 @@
 	  offset = [s count] - 2;
 
 	specifier = [PSSpecifier preferenceSpecifierNamed:name
-						   target:nil
-						      set:nil
-						      get:nil
-						   detail:[bundle principalClass]
-						     cell:PSLINKLIST_CELLID
-						     edit:nil];
-
+	                                           target:nil
+	                                              set:nil
+	                                              get:nil
+	                                           detail:[bundle principalClass]
+	                                             cell:PSLINKLIST_CELLID
+	                                             edit:nil];
 	[s insertObject:specifier
 		atIndex:offset];
+
+    }
+
+    /* second walk - now we disable menu items (if needed) */
+    for (NSBundle *bundle in bundleList)
+      {
+	Class bundleClass = [bundle principalClass];
+
+	if ([bundleClass respondsToSelector:@selector(disableMenuItems)])
+	  {
+	    NSArray *hideRequests = [bundleClass disableMenuItems];
+
+	    for (NSString *itemId in hideRequests)
+	      {
+		int i = 0;
+		for (; i < [s count]; i++)
+		  {
+		    if ([[[s objectAtIndex:i] propertyForKey:@"id"] isEqualToString:itemId])
+		      {
+			[s removeObjectAtIndex:i];
+			i = [s count] + 1;
+			break;
+		      }
+		  }
+	      }
+	  }
       }
+
     return s;
 }
 
 @end
+#endif
 
 @implementation LocalizedItemsController
 - (NSArray *)specifiers
@@ -144,6 +173,7 @@
 {
     self = [super initForContentSize:size];
     _zsIPC = ZSInitMessaging();
+    _cachedSpecifiers = nil;
 
 #if IPHONE_OS_RELEASE >= 2
     glob_t bundles;
@@ -151,7 +181,7 @@
 
     if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) == 0)
       {
-	freopen("/tmp/prefs.log", "a", stderr);
+//	freopen("/tmp/prefs.log", "a", stderr);
 
 	NSLog(@"path_c: %d", bundles.gl_pathc);
 	int i = 0;
@@ -189,7 +219,10 @@
 
 -(void)dealloc
 {
-#if IPHONEOS_RELEASE >= 2
+    if (_cachedSpecifiers != nil)
+      [_cachedSpecifiers release];
+
+#if IPHONE_OS_RELEASE >= 2
     if (_pluginBundles != nil)
       [_pluginBundles release];
 #endif
@@ -200,12 +233,18 @@
 
 -(NSArray*)specifiers
 {
+    if (_cachedSpecifiers != nil)
+      return _cachedSpecifiers;
+
     NSArray *s = [self loadSpecifiersFromPlistName:@"ZSRelay"
                                             target:self];
     s = [self localizedSpecifiersForSpecifiers:s];
 
-    return [self updateSpecifiers:s
-		      withBundles:_pluginBundles];
+    _cachedSpecifiers = [self updateSpecifiers:s
+		                   withBundles:_pluginBundles];
+
+    [_cachedSpecifiers retain];
+    return _cachedSpecifiers;
 }
 
 -(void)triggerReConfig

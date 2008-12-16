@@ -38,6 +38,13 @@
     return @"SSH on launch";
 }
 
++(NSArray*)disableMenuItems
+{
+    return [NSArray arrayWithObjects:@"ID_ENABLE_INSOMNIA",
+				     @"ID_SSH_QUICKLAUNCH",
+				     nil];
+}
+
 -(id)initForContentSize:(struct CGSize)size 
 {
     self = [super initForContentSize:size];
