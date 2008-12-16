@@ -35,7 +35,7 @@
 
 +(NSString*)insertAfter
 {
-    return @"SSH on launch";
+    return @"ID_SSH_QUICKLAUNCH";
 }
 
 +(NSArray*)disableMenuItems
