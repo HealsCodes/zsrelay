@@ -1,0 +1,10 @@
+﻿
+/* zsrelay + iPhoneModem */
+"zsrelay" = "iPhoneModem";
+
+/* Enable/Disable Demo-Stuff */
+"Enable Demo-Stuff" = "Beispielkram";
+
+/* Refresh prefs plugin */
+"Support Plugins" = "Plugins unterstützen!";
+

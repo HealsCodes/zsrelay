@@ -17,8 +17,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 */
 
-#ifndef __ZSRELAY_SETTINGS_H
-#define __ZSRELAY_SETTINGS_H 1
+#ifndef __DEMO_H
+#define __DEMO_H 1
 
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
@@ -30,67 +30,39 @@
 #import <Preferences/PSListItemsController.h>
 #import <Preferences/PSSpecifier.h>
 
-#include "zsipc.h"
+#import "LocalizedControllers.h"
 
-@interface LocalizedListController : PSListController
+@interface Demo : LocalizedListController
 {
 }
--(NSArray *)localizedSpecifiersForSpecifiers:(NSArray *)s;
--(id)navigationTitle;
--(NSArray*)updateSpecifiers:(NSArray*)mySpecifiers withBundles:(NSArray*)bundleList;
-@end
 
-@interface LocalizedItemsController : PSListItemsController
-{
-}
++(NSString*)entryName;
++(NSString*)insertAfter;
+
+-(id)initForContentSize:(struct CGSize)size;
+-(void)dealloc;
+
+-(void)setup:(PSListController*)parent;
 -(NSArray *)specifiers;
+
+-(void)demoButton:(id)sender;
 @end
 
-
-@interface ZSRelaySettings : LocalizedListController
+@interface DemoSub : LocalizedListController
 {
-    ZSIPCRef _zsIPC;
-#if IPHONE_OS_RELEASE >= 2
-    NSMutableArray *_pluginBundles;
-#endif
 }
 
 -(id)initForContentSize:(struct CGSize)size;
 -(void)dealloc;
 
--(NSArray*)specifiers;
-
--(void)triggerReConfig;
-
--(void)setDaemonEnabled:(id)value specifier:(id)specifier;
--(void)setSSHEnabled:(id)value specifier:(id)specifier;
--(void)setPrefVal:(id)value specifier:(id)specifier;
-
--(void)supportButton:(id)sender;
-@end
-
-@interface AdvancedController : LocalizedListController
-{
-    long _trafficIn;
-    long _trafficOut;
-    long _connections;
-
-    ZSIPCRef _zsIPC;
-}
--(id)initForContentSize:(struct CGSize)size;
--(void)dealloc;
-
+-(void)setup:(PSListController*)parent;
 -(NSArray *)specifiers;
 
--(void)pollTrafficStats:(NSTimer*)aTimer;
--(NSString*)getTrafficIn:(id)sender;
--(NSString*)getTrafficOut:(id)sender;
--(NSString*)getConnections:(id)sender;
-
--(NSString*)getFormatedTraffic:(long)trafficStat;
+-(void)demoButton:(id)sender;
 @end
 
-#endif /* __ZSRELAY_SETTINGS_H 1 */
+
+#endif /* __DEMO_H 1 */
 
 /* vim: ai ts=8 sts=4 sw=4 fdm=marker noet :
 */

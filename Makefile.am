@@ -9,8 +9,11 @@ distclean-local:
 	@rm -rf src/zscmd/zscmd || true
 	@rm -rf src/prefplug/ZSRelaySettings_ || true
 	@rm -rf src/prefplug/ZSRelaySettings || true
+	@rm -rf src/prefplug/Demo_ || true
+	@rm -rf src/prefplug/Demo || true
 	@rm -rf src/*/*.app
 	@rm -rf src/*/*.bundle
+	@rm -rf src/prefplug/plugins
 
 fakesign: distclean-local all
 if IPHONE_OS_RELEASE2
@@ -21,6 +24,7 @@ if IPHONE_OS_RELEASE2
 	$(SIGNHELPER) src/zsrelay/zsrelay
 	$(SIGNHELPER) src/zscmd/zscmd
 	$(SIGNHELPER) src/prefplug/ZSRelaySettings
+	$(SIGNHELPER) src/prefplug/Demo
 endif
 
 app-bundle: fakesign
@@ -29,9 +33,15 @@ app-bundle: fakesign
 	@cp src/zsrelay/zsrelay src/zsrelay/ZSRelay.app/zsrelay
 
 pref-bundle: app-bundle
+	@echo "Creating preference bundle..."
 	@mkdir -p src/prefplug/ZSRelaySettings.bundle
 	@cp -r $(srcdir)/misc/Prefs/* src/prefplug/ZSRelaySettings.bundle/
+	@rm -r src/prefplug/ZSRelaySettings.bundle/plugins
 	@cp src/prefplug/ZSRelaySettings src/prefplug/ZSRelaySettings.bundle/
+	@echo "Creating plugin 'Demo.bundle'..."
+	@mkdir -p src/prefplug/plugins/Demo.bundle
+	@cp -r $(srcdir)/misc/Prefs/plugins/Demo/* src/prefplug/plugins/Demo.bundle/
+	@cp src/prefplug/Demo src/prefplug/plugins/Demo.bundle/
 
 dist-deb: pref-bundle
 	@cp -f $(srcdir)/debian/{pre,post}{inst,rm} debian/ || true

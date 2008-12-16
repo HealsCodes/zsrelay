@@ -22,13 +22,18 @@
 #endif
 
 #import "ZSRelaySettings.h"
+#import <Preferences/PSSpecifier.h>
+
 #include <stdio.h>
+#include <glob.h>
 
 #include "zsipc.h"
 
-@implementation LocalizedListController
-- (NSArray *)localizedSpecifiersForSpecifiers:(NSArray *)s {
+#define PREFS_BUNDLE_PATH "/System/Library/PreferenceBundles/ZSRelaySettings.bundle/plugins/*.bundle"
 
+@implementation LocalizedListController
+-(NSArray*)localizedSpecifiersForSpecifiers:(NSArray*)s
+{
   int i;
   for(i=0; i<[s count]; i++)
     {
@@ -55,11 +60,72 @@
   return s;
 }
 
-- (id)navigationTitle {
+-(id)navigationTitle
+{
   return [[self bundle] localizedStringForKey:_title
                                         value:_title
                                         table:nil];
 }
+
+-(NSArray*)updateSpecifiers:(NSArray*)mySpecifiers withBundles:(NSArray*)bundleList
+{
+#define PSGROUP_CELLID    0
+#define PSLINKLIST_CELLID 1
+
+    NSMutableArray *s = [mySpecifiers mutableCopy];
+
+    for (NSBundle *bundle in bundleList)
+      {
+	int offset = -1;
+	NSString *name = nil;
+	PSSpecifier *specifier = nil;
+
+	Class bundleClass = [bundle principalClass];
+
+	if ([bundleClass respondsToSelector:@selector(entryName)])
+	  name = [NSString stringWithString:[bundleClass entryName]];
+	else
+	  name = [NSString stringWithFormat:@"%@", [bundle principalClass]];
+
+	if ([bundleClass respondsToSelector:@selector(insertAfter)])
+	  {
+	    BOOL match = NO;
+	    offset = [s count] -1;
+
+	    while (offset >= 0)
+	      {
+		PSSpecifier *sp = [s objectAtIndex:offset];
+
+		if ([[sp propertyForKey:@"id"] isEqualToString:[bundleClass insertAfter]])
+		  {
+		    match = YES;
+		    break;
+		  }
+
+		offset--;
+	      }
+
+	    if (match)
+	      offset++;
+	  }
+
+	if (offset == -1)
+	  offset = [s count] - 2;
+
+	specifier = [PSSpecifier preferenceSpecifierNamed:name
+						   target:nil
+						      set:nil
+						      get:nil
+						   detail:[bundle principalClass]
+						     cell:PSLINKLIST_CELLID
+						     edit:nil];
+
+	[s insertObject:specifier
+		atIndex:offset];
+      }
+    return s;
+}
+
 @end
 
 @implementation LocalizedItemsController
@@ -67,6 +133,7 @@
 {
     NSArray *s = [self itemsFromParent];
     s = [self localizedSpecifiersForSpecifiers:s];
+
     return s;
 }
 @end
@@ -78,11 +145,55 @@
     self = [super initForContentSize:size];
     _zsIPC = ZSInitMessaging();
 
+#if IPHONE_OS_RELEASE >= 2
+    glob_t bundles;
+    _pluginBundles = [[NSMutableArray alloc] initWithCapacity:10];
+
+    if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) == 0)
+      {
+	freopen("/tmp/prefs.log", "a", stderr);
+
+	NSLog(@"path_c: %d", bundles.gl_pathc);
+	int i = 0;
+
+	for (; i < bundles.gl_pathc; i++)
+	  {
+	    NSBundle *bundle = nil;
+	    NSString *path = [NSString stringWithCString:bundles.gl_pathv[i]
+	                                        encoding:NSASCIIStringEncoding];
+
+	    NSLog(@"loading bundle: %@", path);
+	    bundle = [NSBundle bundleWithPath:path];
+
+	    if (bundle == nil)
+	      {
+		NSLog(@"failed to load bundle %@", path);
+		continue;
+	      }
+
+	    if ([bundle principalClass])
+	      {
+		NSLog(@".. pricipalClass: %@", [bundle principalClass]);
+		[_pluginBundles addObject:bundle];
+	      }
+	    else
+	      NSLog(@".. bundle defines no principalClass!?");
+	  }
+
+	globfree(&bundles);
+      }
+#endif
+
     return self;
 }
 
 -(void)dealloc
 {
+#if IPHONEOS_RELEASE >= 2
+    if (_pluginBundles != nil)
+      [_pluginBundles release];
+#endif
+
     ZSDestroy(_zsIPC);
     [super dealloc];
 }
@@ -91,9 +202,10 @@
 {
     NSArray *s = [self loadSpecifiersFromPlistName:@"ZSRelay"
                                             target:self];
-
     s = [self localizedSpecifiersForSpecifiers:s];
-    return s;
+
+    return [self updateSpecifiers:s
+		      withBundles:_pluginBundles];
 }
 
 -(void)triggerReConfig
