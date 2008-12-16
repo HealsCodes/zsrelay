@@ -29,7 +29,29 @@
 
 #include "zsipc.h"
 
+#if IPHONE_OS_RELEASE >= 2
 #define PREFS_BUNDLE_PATH "/System/Library/PreferenceBundles/ZSRelaySettings.bundle/plugins/*.bundle"
+
+/* Provide the fast enumeration prototypes */
+typedef struct {
+   unsigned long state;
+   id *itemsPtr;
+   unsigned long *mutationsPtr;
+   unsigned long extra[5];
+} NSFastEnumerationState;
+
+@interface NSArray (FastEnumeration)
+-(NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState*)state
+                                 objects:(id*)stackbuf count:(NSUInteger)len;
+@end
+
+/* Provide the informal interface plugin bundles may implement */
+@interface NSObject (ZSPrefPlugin)
++(NSString*)entryName;
++(NSString*)insertAfter;
++(NSArray*)disableMenuItems;
+@end
+#endif
 
 @implementation LocalizedListController
 -(NSArray*)localizedSpecifiersForSpecifiers:(NSArray*)s
@@ -156,16 +178,6 @@
 
 @end
 #endif
-
-@implementation LocalizedItemsController
-- (NSArray *)specifiers
-{
-    NSArray *s = [self itemsFromParent];
-    s = [self localizedSpecifiersForSpecifiers:s];
-
-    return s;
-}
-@end
 
 @implementation ZSRelaySettings
 

@@ -40,13 +40,6 @@
 -(NSArray*)updateSpecifiers:(NSArray*)mySpecifiers withBundles:(NSArray*)bundleList;
 @end
 
-@interface LocalizedItemsController : PSListItemsController
-{
-}
--(NSArray *)specifiers;
-@end
-
-
 @interface ZSRelaySettings : LocalizedListController
 {
     ZSIPCRef _zsIPC;
@@ -64,7 +57,6 @@
 -(void)triggerReConfig;
 
 -(void)setDaemonEnabled:(id)value specifier:(id)specifier;
--(void)setSSHEnabled:(id)value specifier:(id)specifier;
 -(void)setPrefVal:(id)value specifier:(id)specifier;
 
 -(void)supportButton:(id)sender;

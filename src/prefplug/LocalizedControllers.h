@@ -30,11 +30,5 @@
 -(id)navigationTitle;
 @end
 
-@interface LocalizedItemsController : PSListItemsController
-{
-}
--(NSArray *)specifiers;
-@end
-
 #endif /* __LOCALIZED_CONTROLLERS_H 1 */
 
