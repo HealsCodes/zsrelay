@@ -31,6 +31,12 @@
 
 #if IPHONE_OS_RELEASE >= 2
 #define PREFS_BUNDLE_PATH "/System/Library/PreferenceBundles/ZSRelaySettings.bundle/plugins/*.bundle"
+#define PREFS_BUNDLE_DISABLED_PATH "/System/Library/PreferenceBundles/ZSRelaySettings.bundle/plugins/*.bundle_disabled"
+
+#define PSGROUP_CELLID    0
+#define PSLINKLIST_CELLID 1
+#define PSSWITCH_CELLID   6
+
 
 /* Provide the fast enumeration prototypes */
 typedef struct {
@@ -93,9 +99,6 @@ typedef struct {
 #if IPHONE_OS_RELEASE >= 2
 -(NSArray*)updateSpecifiers:(NSArray*)mySpecifiers withBundles:(NSArray*)bundleList
 {
-#define PSGROUP_CELLID    0
-#define PSLINKLIST_CELLID 1
-
     NSMutableArray *s = [mySpecifiers mutableCopy];
 
     /* first walk - insert plugin bundles into desired locations */
@@ -255,7 +258,6 @@ typedef struct {
 	      }
 	  }
       }
-
     return s;
 }
 
@@ -272,11 +274,12 @@ typedef struct {
 
 #if IPHONE_OS_RELEASE >= 2
     glob_t bundles;
+    _pluginsTotal  = 0;
     _pluginBundles = [[NSMutableArray alloc] initWithCapacity:10];
 
     if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) == 0)
       {
-//	freopen("/tmp/prefs.log", "a", stderr);
+	freopen("/tmp/prefs.log", "a", stderr);
 
 	NSLog(@"path_c: %d", bundles.gl_pathc);
 	int i = 0;
@@ -300,11 +303,18 @@ typedef struct {
 	      {
 		NSLog(@".. pricipalClass: %@", [bundle principalClass]);
 		[_pluginBundles addObject:bundle];
+		_pluginsTotal++;
 	      }
 	    else
 	      NSLog(@".. bundle defines no principalClass!?");
 	  }
 
+	globfree(&bundles);
+      }
+
+    if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) == 0)
+      {
+	_pluginsTotal += bundles.gl_pathc;
 	globfree(&bundles);
       }
 #endif
@@ -331,13 +341,31 @@ typedef struct {
     if (_cachedSpecifiers != nil)
       return _cachedSpecifiers;
 
-    NSArray *s = [self loadSpecifiersFromPlistName:@"ZSRelay"
-                                            target:self];
-    s = [self localizedSpecifiersForSpecifiers:s];
+    NSMutableArray *s = [self loadSpecifiersFromPlistName:@"ZSRelay"
+                                                   target:self];
+    s = [NSMutableArray arrayWithArray:[self localizedSpecifiersForSpecifiers:s]];
 
-    _cachedSpecifiers = [self updateSpecifiers:s
-		                   withBundles:_pluginBundles];
+#if IPHONE_OS_RELEASE >= 2
+    s = [self updateSpecifiers:s
+		   withBundles:_pluginBundles];
 
+    if (_pluginsTotal > 0)
+      {
+	/* we have bundles - we need to control them a little */
+	PSSpecifier *specifier = nil;
+	specifier = [PSSpecifier preferenceSpecifierNamed:@"Plugins"
+	                                           target:nil
+	                                              set:nil
+	                                              get:nil
+	                                           detail:[PluginsController class]
+	                                             cell:PSLINKLIST_CELLID
+	                                             edit:nil];
+	/* insert above the support button */
+	[s insertObject:specifier
+	        atIndex:[s count]-3];
+      }
+#endif
+    _cachedSpecifiers = (NSArray*)s;
     [_cachedSpecifiers retain];
     return _cachedSpecifiers;
 }
@@ -495,4 +523,131 @@ typedef struct {
       }
 }
 @end
+
+#if IPHONE_OS_RELEASE >= 2
+@implementation PluginsController
+
+-(id)initForContentSize:(struct CGSize)size 
+{
+    self = [super initForContentSize:size];
+    return self;
+}
+
+-(void)dealloc
+{
+    [super dealloc];
+}
+
+-(NSArray*)specifiers
+{
+    NSMutableArray *s = [self loadSpecifiersFromPlistName:@"plugins"
+                                                   target:self];
+    s = [NSMutableArray arrayWithArray:[self localizedSpecifiersForSpecifiers:s]];
+
+    int i = 0;
+    glob_t bundles;
+
+    for (i = 0; i < 2; i++)
+      {
+	if (i == 0)
+	  {
+	    if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) != 0)
+	      continue;
+	  }
+	else
+	  {
+	    if (glob(PREFS_BUNDLE_DISABLED_PATH, 0, NULL, &bundles) != 0)
+	      continue;
+	  }
+
+	NSLog(@"path_c: %d", bundles.gl_pathc);
+	int j = 0;
+
+	for (; j < bundles.gl_pathc; j++)
+	  {
+	    PSSpecifier *specifier = nil;
+
+	    NSString *bundleName = nil;
+	    NSString *path = [NSString stringWithCString:bundles.gl_pathv[j]
+	                                        encoding:NSASCIIStringEncoding];
+
+
+	    bundleName = [path lastPathComponent];
+	    bundleName = [bundleName stringByReplacingOccurrencesOfString:[bundleName pathExtension]
+	                                                       withString:@""];
+
+	    specifier = [PSSpecifier preferenceSpecifierNamed:bundleName
+	                                               target:self
+	                                                  set:@selector(setPrefVal:specifier:)
+	                                                  get:@selector(getPrefVal:)
+	                                               detail:nil
+	                                                 cell:PSSWITCH_CELLID
+	                                                 edit:nil];
+
+	    [specifier setProperty:path
+	                    forKey:@"XBundleName"];
+
+	    [s insertObject:specifier
+	            atIndex:[s count] - 2];
+	  }
+
+	globfree(&bundles);
+    }
+
+    return s;
+}
+-(id)getPrefVal:(id)specifier
+{
+    NSString *extension = nil;
+    PSSpecifier *sp = (PSSpecifier*)specifier;
+
+    extension = [sp propertyForKey:@"XBundleName"];
+
+    if (extension == nil)
+      return [NSNumber numberWithBool:NO];
+
+    if ([[extension pathExtension] isEqualToString:@"bundle_disabled"])
+      return [NSNumber numberWithBool:NO];
+
+    return [NSNumber numberWithBool:YES];
+}
+
+-(void)setPrefVal:(id)value specifier:(id)specifier
+{
+   NSString *extension = nil;
+   PSSpecifier *sp = (PSSpecifier*)specifier;
+
+    extension = [sp propertyForKey:@"XBundleName"];
+
+    if (extension == nil)
+      {
+	NSLog(@"extension == nil");
+	return;
+      }
+
+    if ([[extension pathExtension] isEqualToString:@"bundle_disabled"]
+	&& [(NSNumber*)value isEqualToNumber:[NSNumber numberWithBool:YES]])
+      {
+	rename([extension cStringUsingEncoding:NSASCIIStringEncoding],
+	       [[extension stringByReplacingOccurrencesOfString:@"_disabled"
+	                                            withString:@""]
+	                   cStringUsingEncoding:NSASCIIStringEncoding]);
+	perror("rename");
+      }
+
+    if ([[extension pathExtension] isEqualToString:@"bundle"]
+	&& [(NSNumber*)value isEqualToNumber:[NSNumber numberWithBool:NO]])
+      {
+	rename([extension cStringUsingEncoding:NSASCIIStringEncoding],
+	       [[extension stringByAppendingString:@"_disabled"]
+	                   cStringUsingEncoding:NSASCIIStringEncoding]);
+	perror("rename");
+      }
+}
+
+@end
+#endif
+
+
+
 

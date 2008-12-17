@@ -45,6 +45,7 @@
     ZSIPCRef _zsIPC;
 #if IPHONE_OS_RELEASE >= 2
     NSMutableArray *_pluginBundles;
+    int _pluginsTotal;
 #endif
     NSArray *_cachedSpecifiers;
 }
@@ -82,6 +83,21 @@
 
 -(NSString*)getFormatedTraffic:(long)trafficStat;
 @end
+
+#if IPHONE_OS_RELEASE >= 2
+@interface PluginsController : LocalizedListController
+{
+}
+
+-(id)initForContentSize:(struct CGSize)size;
+-(void)dealloc;
+
+-(NSArray*)specifiers;
+
+-(void)setPrefVal:(id)value specifier:(id)specifier;
+#endif
+@end
+
 
 #endif /* __ZSRELAY_SETTINGS_H 1 */
 
