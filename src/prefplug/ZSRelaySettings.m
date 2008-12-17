@@ -138,12 +138,12 @@ typedef struct {
 	    name = [NSString stringWithFormat:@"%@", [bundle principalClass]];
 
 	    specifier = [PSSpecifier preferenceSpecifierNamed:name
-						       target:nil
-							  set:nil
-							  get:nil
-						       detail:[bundle principalClass]
-							 cell:PSLINKLIST_CELLID
-							 edit:nil];
+	                                               target:nil
+	                                                  set:nil
+	                                                  get:nil
+	                                               detail:[bundle principalClass]
+	                                                 cell:PSLINKLIST_CELLID
+	                                                 edit:nil];
 
 	    /* add a icon tag to each plugin */
 	    NSString *iconPath = nil;
@@ -164,9 +164,9 @@ typedef struct {
 	      {
 		[specifier setupIconImageWithPath:iconPath];
 		[specifier setProperty:iconName
-				forKey:@"icon"];
+		                forKey:@"icon"];
 		[specifier setProperty:[UIImage imageAtPath:iconPath]
-				forKey:@"iconImage"];
+		                forKey:@"iconImage"];
 	      }
 	    [s insertObject:specifier
 		    atIndex:offset];
@@ -178,13 +178,28 @@ typedef struct {
 
 	    for (NSDictionary *entry in entryList)
 	      {
+		if ([entry objectForKey:@"seperate"] != nil)
+		  {
+		    /* only a new grouping */
+		    specifier = [PSSpecifier preferenceSpecifierNamed:[entry objectForKey:@"name"]
+		                                               target:nil
+		                                                  set:nil
+		                                                  get:nil
+		                                               detail:nil
+		                                                 cell:PSGROUP_CELLID
+		                                                 edit:nil];
+		    [s insertObject:specifier
+		            atIndex:offset];
+		    continue;
+		  }
+
 		specifier = [PSSpecifier preferenceSpecifierNamed:[entry objectForKey:@"name"]
-							   target:nil
-							      set:nil
-							      get:nil
-							   detail:[entry objectForKey:@"class"]
-							     cell:PSLINKLIST_CELLID
-							     edit:nil];
+		                                           target:nil
+		                                              set:nil
+		                                              get:nil
+		                                           detail:[entry objectForKey:@"class"]
+		                                             cell:PSLINKLIST_CELLID
+		                                             edit:nil];
 
 		/* add a icon tag to each plugin */
 		NSString *iconPath = nil;
@@ -211,7 +226,7 @@ typedef struct {
 		  }
 
 		[s insertObject:specifier
-			atIndex:offset];
+		        atIndex:offset];
 	      }
 	  }
     }
