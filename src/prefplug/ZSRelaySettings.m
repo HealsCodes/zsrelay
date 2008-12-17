@@ -106,11 +106,6 @@ typedef struct {
 
 	Class bundleClass = [bundle principalClass];
 
-	if ([bundleClass respondsToSelector:@selector(entryName)])
-	  name = [NSString stringWithString:[bundleClass entryName]];
-	else
-	  name = [NSString stringWithFormat:@"%@", [bundle principalClass]];
-
 	if ([bundleClass respondsToSelector:@selector(insertAfter)])
 	  {
 	    BOOL match = NO;
@@ -136,16 +131,39 @@ typedef struct {
 	if (offset == -1)
 	  offset = [s count] - 2;
 
-	specifier = [PSSpecifier preferenceSpecifierNamed:name
-	                                           target:nil
-	                                              set:nil
-	                                              get:nil
-	                                           detail:[bundle principalClass]
-	                                             cell:PSLINKLIST_CELLID
-	                                             edit:nil];
-	[s insertObject:specifier
-		atIndex:offset];
+	if ([bundleClass respondsToSelector:@selector(singleEntry)])
+	  {
+	    name = [NSString stringWithString:[bundleClass singleEntry]];
+	    name = [NSString stringWithFormat:@"%@", [bundle principalClass]];
 
+	    specifier = [PSSpecifier preferenceSpecifierNamed:name
+						       target:nil
+							  set:nil
+							  get:nil
+						       detail:[bundle principalClass]
+							 cell:PSLINKLIST_CELLID
+							 edit:nil];
+	    [s insertObject:specifier
+		    atIndex:offset];
+	  }
+	else if ([bundleClass respondsToSelector:@selector(entryList)])
+	  {
+	    NSArray *entryList = nil;
+	    entryList = [bundleClass entryList];
+
+	    for (NSDictionary *entry in entryList)
+	      {
+		specifier = [PSSpecifier preferenceSpecifierNamed:[entry objectForKey:@"name"]
+							   target:nil
+							      set:nil
+							      get:nil
+							   detail:[entry objectForKey:@"class"]
+							     cell:PSLINKLIST_CELLID
+							     edit:nil];
+		[s insertObject:specifier
+			atIndex:offset];
+	      }
+	  }
     }
 
     /* second walk - now we disable menu items (if needed) */

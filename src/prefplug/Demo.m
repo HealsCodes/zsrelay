@@ -27,10 +27,25 @@
 #include <stdio.h>
 
 @implementation Demo
-
-+(NSString*)entryName
+/*
++(NSString*)singleEntry
 {
     return @"Demo Plugin";
+}
+*/
+
++(NSArray*)entryList
+{
+    return [NSArray arrayWithObjects:
+		[NSDictionary dictionaryWithObjectsAndKeys:
+		    @"Demo entry1", @"name",
+		    [Demo class]  , @"class",
+		    nil, nil],
+		[NSDictionary dictionaryWithObjectsAndKeys:
+		    @"Demo entry2" , @"name",
+		    [DemoSub class], @"class",
+		    nil, nil],
+		nil];
 }
 
 +(NSString*)insertAfter

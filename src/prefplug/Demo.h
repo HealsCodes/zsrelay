@@ -36,13 +36,13 @@
 {
 }
 
-+(NSString*)entryName;
+// +(NSString*)singleEntryName; /* Would be used for single entry plugin */
++(NSArray*)entryList;
 +(NSString*)insertAfter;
 
 -(id)initForContentSize:(struct CGSize)size;
 -(void)dealloc;
 
--(void)setup:(PSListController*)parent;
 -(NSArray *)specifiers;
 
 -(void)demoButton:(id)sender;
@@ -55,7 +55,6 @@
 -(id)initForContentSize:(struct CGSize)size;
 -(void)dealloc;
 
--(void)setup:(PSListController*)parent;
 -(NSArray *)specifiers;
 
 -(void)demoButton:(id)sender;
