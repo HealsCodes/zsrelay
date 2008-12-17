@@ -312,7 +312,7 @@ typedef struct {
 	globfree(&bundles);
       }
 
-    if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) == 0)
+    if (glob(PREFS_BUNDLE_DISABLED_PATH, 0, NULL, &bundles) == 0)
       {
 	_pluginsTotal += bundles.gl_pathc;
 	globfree(&bundles);
