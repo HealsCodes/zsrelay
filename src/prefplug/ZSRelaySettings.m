@@ -279,7 +279,7 @@ typedef struct {
 
     if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) == 0)
       {
-	freopen("/tmp/prefs.log", "a", stderr);
+//	freopen("/tmp/prefs.log", "a", stderr);
 
 	NSLog(@"path_c: %d", bundles.gl_pathc);
 	int i = 0;
