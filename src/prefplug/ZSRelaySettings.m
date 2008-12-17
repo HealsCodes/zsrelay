@@ -47,7 +47,8 @@ typedef struct {
 
 /* Provide the informal interface plugin bundles may implement */
 @interface NSObject (ZSPrefPlugin)
-+(NSString*)entryName;
++(NSString*)singleEntry;
++(NSArray*)entryList;
 +(NSString*)insertAfter;
 +(NSArray*)disableMenuItems;
 @end
@@ -143,6 +144,30 @@ typedef struct {
 						       detail:[bundle principalClass]
 							 cell:PSLINKLIST_CELLID
 							 edit:nil];
+
+	    /* add a icon tag to each plugin */
+	    NSString *iconPath = nil;
+	    NSString *iconName = nil;
+
+	    iconPath = [bundle pathForResource:@"icon"
+	                                ofType:@"png"];
+	    iconName = @"icon.png";
+
+	    if (iconPath == nil)
+	      {
+		  iconPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"pref_plugin"
+		                                                              ofType:@"png"];
+		  iconName = @"pref_plugin.png";
+	      }
+
+	    if (iconPath != nil)
+	      {
+		[specifier setupIconImageWithPath:iconPath];
+		[specifier setProperty:iconName
+				forKey:@"icon"];
+		[specifier setProperty:[UIImage imageAtPath:iconPath]
+				forKey:@"iconImage"];
+	      }
 	    [s insertObject:specifier
 		    atIndex:offset];
 	  }
@@ -160,6 +185,31 @@ typedef struct {
 							   detail:[entry objectForKey:@"class"]
 							     cell:PSLINKLIST_CELLID
 							     edit:nil];
+
+		/* add a icon tag to each plugin */
+		NSString *iconPath = nil;
+		NSString *iconName = nil;
+
+		iconPath = [bundle pathForResource:@"icon"
+		                            ofType:@"png"];
+		iconName = @"icon.png";
+
+		if (iconPath == nil)
+		  {
+		    iconPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"pref_plugin"
+		                                                                ofType:@"png"];
+		    iconName = @"pref_plugin.png";
+		  }
+
+		if (iconPath != nil)
+		  {
+		    [specifier setupIconImageWithPath:iconPath];
+		    [specifier setProperty:iconName
+		                    forKey:@"icon"];
+		    [specifier setProperty:[UIImage imageAtPath:iconPath]
+                                    forKey:@"iconImage"];
+		  }
+
 		[s insertObject:specifier
 			atIndex:offset];
 	      }
