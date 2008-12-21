@@ -1,3 +1,9 @@
+org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@12beta1) unstable; urgency=low
+
+  * First plugin branch beta version.
+
+ -- René Köcher <shirk@bitspin.org>  Wed, 17 Dec 2008 22:05:56 +0100
+
 org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@11) unstable; urgency=low
 
   * Status Icons are back!!
