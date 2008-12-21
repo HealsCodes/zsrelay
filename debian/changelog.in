@@ -1,3 +1,10 @@
+org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@12beta2) unstable; urgency=low
+
+  * Updated Plugin loader code
+  * Loggin can be enabled / disabled
+
+ -- René Köcher <shirk@bitspin.org>  Sun, 21 Dec 2008 10:32:16 +0100
+
 org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@12beta1) unstable; urgency=low
 
   * First plugin branch beta version.

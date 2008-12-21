@@ -25,6 +25,8 @@
 #import <Preferences/PSSpecifier.h>
 
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <glob.h>
 
 #include "zsipc.h"
@@ -268,6 +270,12 @@ typedef struct {
 
 -(id)initForContentSize:(struct CGSize)size 
 {
+    struct stat stats;
+    if (stat("/tmp/ZSRelaySettings.log", &stats) == 0)
+      {
+	freopen("/tmp/ZSRelaySettings.log", "a", stderr);
+      }
+
     self = [super initForContentSize:size];
     _zsIPC = ZSInitMessaging();
     _cachedSpecifiers = nil;
@@ -279,23 +287,29 @@ typedef struct {
 
     if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) == 0)
       {
-//	freopen("/tmp/prefs.log", "a", stderr);
-
 	NSLog(@"path_c: %d", bundles.gl_pathc);
 	int i = 0;
 
 	for (; i < bundles.gl_pathc; i++)
 	  {
 	    NSBundle *bundle = nil;
+	    NSError  *error  = nil;
 	    NSString *path = [NSString stringWithCString:bundles.gl_pathv[i]
 	                                        encoding:NSASCIIStringEncoding];
 
 	    NSLog(@"loading bundle: %@", path);
-	    bundle = [NSBundle bundleWithPath:path];
+	    bundle = [[[NSBundle alloc] initWithPath:path] autorelease];
+//	    bundle = [NSBundle bundleWithPath:path];
 
-	    if (bundle == nil)
+	    if ([bundle loadAndReturnError:&error] == NO)
 	      {
 		NSLog(@"failed to load bundle %@", path);
+		if (error != nil)
+		  {
+		    NSLog(@".. error was: %@", [error localizedDescription]);
+		    NSLog(@"..          : %@", [error localizedFailureReason]);
+		    [error release];
+		  }
 		continue;
 	      }
 
@@ -317,6 +331,7 @@ typedef struct {
 	_pluginsTotal += bundles.gl_pathc;
 	globfree(&bundles);
       }
+    NSLog(@"..  %d plugins registered", _pluginsTotal);
 #endif
 
     return self;
@@ -647,7 +662,4 @@ typedef struct {
 
 @end
 #endif
-
-
-
 
