@@ -31,23 +31,19 @@ iphone_app_check_connection(void)
 
     NSLog(@"iphone_app_check_connection..");
     if ([ZSRelayApp sharedApp] != nil)
-    {
+      {
 	if ([[NetworkController sharedInstance] isEdgeUp] == NO)
-	{
+	  {
 	    NSLog(@"bringing EDGE up");
 
 	    [[ZSRelayApp sharedApp] synchronousConnectionKeepAlive];
 	    NSLog(@"EDGE should be up");
-	}
+	  }
 	else
-	{
-	    NSLog(@"EDGE _is_ up");
-	}
-    }
+	  NSLog(@"EDGE _is_ up");
+      }
     else
-    {
-	NSLog(@"sharedApp == nil!");
-    }
+      NSLog(@"sharedApp == nil!");
     [pool release];
 }
 
@@ -58,8 +54,8 @@ iphone_app_check_connection(void)
 void
 powerCallback(void *refCon, io_service_t service, natural_t type, void *argument)
 {	
-	[(ZSRelayApp*)refCon handlePMMessage:type
-	                        withArgument:argument];
+    [(ZSRelayApp*)refCon handlePMMessage:type
+                            withArgument:argument];
 }
 
 
@@ -70,23 +66,21 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     static IONotificationPortRef notificationPort = NULL;
 
     if (isActive == YES && notificationPort == NULL)
-    {
+      {
 	root_port = IORegisterForSystemPower(self, &notificationPort,
 					     powerCallback, &notifier);
-	
+
 	// add the notification port to the application runloop
 	CFRunLoopAddSource(CFRunLoopGetCurrent(),
 			   IONotificationPortGetRunLoopSource(notificationPort),
 			   kCFRunLoopCommonModes);
 
 	return YES;
-    }
+      }
     else
-    {
+      {
 	if (notificationPort == NULL)
-	{
-	    return YES;
-	}
+	  return YES;
 
 	CFRunLoopRemoveSource(CFRunLoopGetCurrent(),
 			      IONotificationPortGetRunLoopSource(notificationPort),
@@ -97,7 +91,7 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 	notificationPort = NULL;
 
 	return YES;
-    }
+      }
 
     return NO;
 }
@@ -107,28 +101,28 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     static int messagesSoFar = 0;
 
     switch (type)
-    {
-	case kIOMessageSystemWillSleep:
-	    IOAllowPowerChange(root_port, (long)argument);
-	    break;
+      {
+      case kIOMessageSystemWillSleep:
+	IOAllowPowerChange(root_port, (long)argument);
+	break;
 
-	case kIOMessageCanSystemSleep:
-	    IOCancelPowerChange(root_port, (long)argument);
-	    break; 
+      case kIOMessageCanSystemSleep:
+	IOCancelPowerChange(root_port, (long)argument);
+	break; 
 
-	case kIOMessageSystemHasPoweredOn:
-	    break;
-    }
+      case kIOMessageSystemHasPoweredOn:
+	break;
+      }
 
     messagesSoFar++;
     NSLog(@"handlePMMessage: messagesSoFar: %d", messagesSoFar);
 
-    if (messagesSoFar == 20) /* one message each 30 seconds */
-    {
+    if (messagesSoFar == 120) /* one message each 5 seconds */
+      {
 	NSLog(@"handlePMMessage: sending connectionKeepAlive", messagesSoFar);
 	[self connectionKeepAlive];
 	messagesSoFar = 0;
-    }
+      }
 }
 
 -(void)synchronousConnectionKeepAlive
@@ -138,28 +132,24 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     NSURLConnection *connection = nil;
 
     if ([[NetworkController sharedInstance] isEdgeUp] == NO)
-    {
+      {
 	_connected = NO;
 	if ([self networkKeepAlive] == YES)
-	{
-	    [self showIcon:@"ZSRelayInsomnia"];
-	}
+	  [self showIcon:@"ZSRelayInsomnia"];
 	else
-	{
-	    [self showIcon:@"ZSRelay"];
-	}
-    }
+	  [self showIcon:@"ZSRelay"];
+      }
 
     NSLog(@"Sending synchronous keep alive to %@", [self keepAliveURI]);
 
     aURL     = [NSURL URLWithString:[self keepAliveURI]];
     request  = [NSMutableURLRequest requestWithURL:aURL
-				       cachePolicy:NSURLRequestReloadIgnoringCacheData
-				   timeoutInterval:30.0];
+                                       cachePolicy:NSURLRequestReloadIgnoringCacheData
+                                   timeoutInterval:30.0];
     [request setHTTPMethod:@"HEAD"];
 
     _urlConnection = [NSURLConnection connectionWithRequest:request
-						   delegate:self];
+                                                   delegate:self];
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSData *data            = nil;
@@ -167,27 +157,21 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     NSURLResponse *response = nil;
 
     data = [NSURLConnection sendSynchronousRequest:request
-				 returningResponse:&response
-					     error:&error];
+                                 returningResponse:&response
+                                             error:&error];
 
     if (error != nil)
-    {	
 	NSLog(@"synchronous request failed: %@", [error localizedDescription]);
-    }
     else
-    {
+      {
 	[self playNotification];
 	_connected = YES;
 
 	if ([self networkKeepAlive] == YES)
-	{
-	    [self showIcon:@"ZSRelayInsomnia"];
-	}
+	  [self showIcon:@"ZSRelayInsomnia"];
 	else
-	{
-	    [self showIcon:@"ZSRelay"];
-	}
-    }
+	  [self showIcon:@"ZSRelay"];
+      }
 
     [pool release];
 }
@@ -198,50 +182,42 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     NSMutableURLRequest *request = nil;
 
     if (_urlConnection != nil)
-    {
+      {
 	NSLog(@"Ignoring keep alive - request pending");
 	return;
-    }
+      }
 
     if ([[NetworkController sharedInstance] isEdgeUp] == NO)
-    {
+      {
 	_connected = NO;
 	if ([self networkKeepAlive] == YES)
-	{
-	    [self showIcon:@"ZSRelayInsomnia"];
-	}
+	  [self showIcon:@"ZSRelayInsomnia"];
 	else
-	{
-	    [self showIcon:@"ZSRelay"];
-	}
-    }
+	  [self showIcon:@"ZSRelay"];
+      }
 
     NSLog(@"Sending keep alive to %@", [self keepAliveURI]);
 
     aURL     = [NSURL URLWithString:[self keepAliveURI]];
     request  = [NSMutableURLRequest requestWithURL:aURL
-				       cachePolicy:NSURLRequestReloadIgnoringCacheData
-				   timeoutInterval:30.0];
+                                       cachePolicy:NSURLRequestReloadIgnoringCacheData
+                                   timeoutInterval:30.0];
 
     [request setHTTPMethod:@"HEAD"];
     _urlConnection = [NSURLConnection connectionWithRequest:request
-						   delegate:self];
+                                                   delegate:self];
 }
 
 -(void)connection:(NSURLConnection*)theConnection didFailWithError:(NSError*)error
 {
     _connected = NO;
     NSLog(@"keep alive failed with error: %@",
-	    [error localizedDescription]);
+	  [error localizedDescription]);
 
     if ([self networkKeepAlive] == YES)
-    {
-	[self showIcon:@"ZSRelayInsomnia"];
-    }
+      [self showIcon:@"ZSRelayInsomnia"];
     else
-    {
-	[self showIcon:@"ZSRelay"];
-    }
+      [self showIcon:@"ZSRelay"];
 
     [theConnection release];
     _urlConnection = nil;
@@ -251,20 +227,15 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 {
 
     if (_connected = NO)
-    {
-        [self playNotification];
-    }
+      [self playNotification];
+
     _connected = YES;
     NSLog(@"keep alive successful");
 
     if ([self networkKeepAlive] == YES)
-    {
-	[self showIcon:@"ZSRelayInsomnia"];
-    }
+      [self showIcon:@"ZSRelayInsomnia"];
     else
-    {
-	[self showIcon:@"ZSRelay"];
-    }
+      [self showIcon:@"ZSRelay"];
 
     [theConnection release];
     _urlConnection = nil;
@@ -272,7 +243,4 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 }
 
 @end
-
-/* vim: ai ft=objc ts=8 sts=4 sw=4 fdm=marker noet :
-*/
 
