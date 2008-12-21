@@ -231,13 +231,41 @@ struct rtbl
 struct socks_req
 {
     int      s;                 /* client socket */
-    int      req;               /* request CONN/BIND */
+    int      req;               /* request CONN/BIND/UDPASSOC */
     struct bin_addr dest;       /* destination address */
     u_int16_t port;             /* destination port (host byte order) */
     u_int8_t  u_len;            /* user name length (socks v4) */
     char     user[255];         /* user name (socks v4) */ 
     int      tbl_ind;           /* proxy table indicator */
 };
+
+struct socks_udpmsg
+{
+    uint16_t   rsv;           /* reserved (0) */
+    uint8_t    frag;          /* message fragment */
+    uint8_t    atyp;
+    union
+      {
+	struct _ipv4_addr
+	  {
+	    in_addr_t addr;
+	    in_port_t port;
+	  } __attribute__((__packed__)) _ip4;
+
+	struct _ipv6_addr
+	  {
+	    struct in6_addr addr;
+	    in_port_t port;
+	  } __attribute__((__packed__)) _ip6;
+
+      } _addr;
+} __attribute__((__packed__));
+
+#define SOCKS_UDPMSG_V4_SIZE(x) \
+  (sizeof((x)->rsv) + sizeof((x)->frag) + sizeof((x)->atyp) + sizeof((x)->_addr._ip4))
+
+#define SOCKS_UDPMSG_V6_SIZE(x) \
+  (sizeof((x)->rsv) + sizeof((x)->frag) + sizeof((x)->atyp) + sizeof((x)->_addr._ip6))
 
 #ifndef SIGFUNC_DEFINED
 typedef void            (*sigfunc_t)();
@@ -319,7 +347,7 @@ extern int serv_loop __P((void));
 int wait_for_read __P((int, long));
 ssize_t timerd_read __P((int, char *, size_t, int, int));
 ssize_t timerd_write __P((int, char *, size_t, int));
-extern int proto_socks __P((int));
+extern int proto_socks __P((int, struct sockaddr_storage *));
 
 /* get-bind.c */
 int get_bind_addr __P((struct socks_req *, struct addrinfo *));

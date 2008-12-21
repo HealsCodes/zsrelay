@@ -209,6 +209,230 @@ set_sock_info(loginfo *li, int cs, int ss)
 u_long idle_timeout = IDLE_TIMEOUT;
 
 void
+udp_relay(int cs, int ss, struct sockaddr_storage *udp)
+{
+    fd_set sockfd, ctlfd;
+    struct sockaddr_storage sender;
+    struct timeval timeout;
+
+    uint8_t buf[65535];    // BIG!!
+    uint8_t outbuf[65535]; // BIG!!
+    ssize_t recvlen = 0;
+    socklen_t addrlen = 0;
+    struct socks_udpmsg *udpmsg = NULL;
+
+    int is_clientmsg = 0;
+
+#ifdef IPHONE_OS
+    pthread_mutex_lock(&stat_lock);
+    stat_connections++;
+    pthread_mutex_unlock(&stat_lock);
+#endif
+
+    sender.ss_family = udp->ss_family;
+
+    errno = 0;
+
+    for (;;)
+      {
+	FD_ZERO(&ctlfd);
+	FD_SET(cs, &ctlfd);
+
+	timeout.tv_sec  = 0;
+	timeout.tv_usec = 100;
+
+	if (select(cs + 1, &ctlfd, NULL, NULL, &timeout) == 1)
+	  {
+	    char c;
+	    if (recv(cs, &c, 1, MSG_PEEK | MSG_DONTWAIT) == 0)
+	      {
+		msg_out(norm, "UDP: control channel closed\n");
+		break;
+	      }
+	  }
+
+	FD_ZERO(&sockfd);
+	FD_SET(ss, &sockfd);
+
+	timeout.tv_sec  = 0;
+	timeout.tv_usec = 100;
+
+	if (select(ss + 1, &sockfd, NULL, NULL, &timeout) == 0)
+	    continue;
+
+	bzero(buf, sizeof(buf));
+	bzero(&sender, sizeof(struct sockaddr_storage));
+	if (sender.ss_family == AF_INET6)
+	  addrlen = sizeof(struct sockaddr_in6);
+	else
+	  addrlen = sizeof(struct sockaddr_in);
+
+	recvlen = recvfrom(ss, buf, sizeof(buf), 0,
+			   (struct sockaddr*)&sender, &addrlen);
+	if (recvlen <= 0)
+	  {
+	    msg_out(warn, "UDP: recvfrom() - %s\n", strerror(errno));
+	    break;
+	  }
+
+	/* validate request - who sent it? */
+	udpmsg = (struct socks_udpmsg*)buf;
+	is_clientmsg = 0;
+	if (udpmsg->rsv == 0)
+	  {
+	    switch (udpmsg->atyp)
+	      {
+	      case S5ATIPV4:
+		  {
+		    struct sockaddr_in *udp_ip4 = (struct sockaddr_in*)udp;
+		    struct sockaddr_in *sender_ip4 = (struct sockaddr_in*)&sender;
+
+		    if (sender_ip4->sin_port == udp_ip4->sin_port)
+		      is_clientmsg = 1;
+		  }
+		break;
+		
+	      case S5ATIPV6:
+		  {
+		    struct sockaddr_in6 *udp_ip6 = (struct sockaddr_in6*)udp;
+		    struct sockaddr_in6 *sender_ip6 = (struct sockaddr_in6*)&sender;
+
+		    if (sender_ip6->sin6_port == udp_ip6->sin6_port)
+		      is_clientmsg = 1;
+		  }
+		break;
+
+	      default:
+		break;
+	      }
+	  }
+
+	if (is_clientmsg == 1)
+	  {
+	    /* looks like our client sent it */
+	    if (udpmsg->atyp == S5ATIPV4)
+	      {
+		struct sockaddr_in remote;
+		bzero(&remote, sizeof(remote));
+
+		remote.sin_addr.s_addr = udpmsg->_addr._ip4.addr;
+		remote.sin_port        = udpmsg->_addr._ip4.port;
+		remote.sin_family      = AF_INET;
+		remote.sin_len         = sizeof(remote);
+		addrlen = sizeof(remote);
+
+		if (sendto(ss, &buf[SOCKS_UDPMSG_V4_SIZE(udpmsg)],
+			   recvlen - SOCKS_UDPMSG_V4_SIZE(udpmsg), 0,
+			   (struct sockaddr*)&remote, addrlen) < 0)
+		  {
+		    msg_out(crit, "UDP: error sending IPv4 request to server\n");
+		    break;
+		  }
+	      }
+	    else
+	      {
+		struct sockaddr_in6 remote;
+		bzero(&remote, sizeof(remote));
+
+		remote.sin6_addr   = udpmsg->_addr._ip6.addr;
+		remote.sin6_port   = udpmsg->_addr._ip6.port;
+		remote.sin6_family = AF_INET6;
+		remote.sin6_len    = sizeof(remote);
+		addrlen = sizeof(remote);
+
+		if (sendto(ss, &buf[SOCKS_UDPMSG_V6_SIZE(udpmsg)],
+			   recvlen - SOCKS_UDPMSG_V6_SIZE(udpmsg), 0,
+			   (struct sockaddr*)&remote, addrlen) < 0)
+		  {
+		    msg_out(crit, "UDP: error sending IPv6 request to server\n");
+		    break;
+		  }
+	      }
+	  }
+	else
+	  {
+	    /* possible server response */
+	    /* TODO: Is it neccessary to distinguish IPv4/v6 ? */
+
+	    bzero(&outbuf, sizeof(outbuf));
+	    udpmsg = (struct socks_udpmsg*)outbuf;
+
+	    if (sender.ss_family == AF_INET6)
+	      {
+		struct sockaddr_in6 remote;
+		struct sockaddr_in6 *udp_ip6 = NULL;
+		struct sockaddr_in6 *sender_ip6 = NULL;
+		
+		bzero(&remote, sizeof(remote));
+		udp_ip6 = (struct sockaddr_in6*)udp;
+		sender_ip6 = (struct sockaddr_in6*)&sender;
+
+		udpmsg->rsv  = 0;
+		udpmsg->frag = 0;
+		udpmsg->atyp = S5ATIPV6;
+		/* this part is unclear - do I have to use _my_ address or the original? */
+		udpmsg->_addr._ip6.addr = sender_ip6->sin6_addr;
+		udpmsg->_addr._ip6.port = sender_ip6->sin6_port;
+
+		memcpy(&outbuf[SOCKS_UDPMSG_V6_SIZE(udpmsg)], buf, recvlen);
+		remote.sin6_addr    = udp_ip6->sin6_addr;
+		remote.sin6_port    = udp_ip6->sin6_port;
+		remote.sin6_family  = AF_INET6;
+		remote.sin6_len     = sizeof(remote);
+		addrlen = sizeof(remote);
+
+		if (sendto(ss, outbuf, recvlen + SOCKS_UDPMSG_V6_SIZE(udpmsg),
+			   0, (struct sockaddr*)&remote, addrlen) < 0)
+		  {
+		    msg_out(crit, "UDP: error sending IPv6 response to client\n");
+		    break;
+		  }
+	      }
+	    else
+	      {
+		struct sockaddr_in remote;
+		struct sockaddr_in *udp_ip4 = NULL;
+		struct sockaddr_in *sender_ip4 = NULL;
+		
+		bzero(&remote, sizeof(remote));
+		udp_ip4 = (struct sockaddr_in*)udp;
+		sender_ip4 = (struct sockaddr_in*)&sender;
+
+		udpmsg->rsv  = 0;
+		udpmsg->frag = 0;
+		udpmsg->atyp = S5ATIPV4;
+		/* this part is unclear - do I have to use _my_ address or the original? */
+		udpmsg->_addr._ip4.addr = sender_ip4->sin_addr.s_addr;
+		udpmsg->_addr._ip4.addr = sender_ip4->sin_port;
+
+		memcpy(&outbuf[SOCKS_UDPMSG_V4_SIZE(udpmsg)], buf, recvlen);
+		remote.sin_addr.s_addr = udp_ip4->sin_addr.s_addr;
+		remote.sin_port        = udp_ip4->sin_port;
+		remote.sin_family      = AF_INET;
+		remote.sin_len         = sizeof(remote);
+		addrlen = sizeof(remote);
+
+		if (sendto(ss, outbuf, recvlen + SOCKS_UDPMSG_V4_SIZE(udpmsg),
+			   0, (struct sockaddr*)&remote, addrlen) < 0)
+		  {
+		    msg_out(crit, "UDP: error sending IPv4 response to client\n");
+		    break;
+		  }
+	      }
+	  }
+      }
+
+    close(ss);
+    close(cs);
+
+#ifdef IPHONE_OS
+    pthread_mutex_lock(&stat_lock);
+    stat_connections--;
+    pthread_mutex_unlock(&stat_lock);
+#endif
+}
+
+void
 relay(int cs, int ss)
 {
     fd_set   rfds, xfds;
@@ -368,7 +592,7 @@ int
 serv_loop(void)
 {
     int    cs, ss = 0;
-    struct sockaddr_storage cl;
+    struct sockaddr_storage cl, udp;
     fd_set readable;
     int    i, n, len;
     char   cl_addr[NI_MAXHOST];
@@ -549,14 +773,26 @@ serv_loop(void)
 #ifdef IPHONE_OS
 		iphone_app_check_connection();
 #endif
-		ss = proto_socks(cs);
+		memset(&udp, 0, sizeof(udp));
+		ss = proto_socks(cs, &udp);
 		if ( ss == -1 )
 		  {
 		    close(cs);  /* may already be closed */
 		    exit(1);
 		  }
+		if (((struct sockaddr_in*)&udp)->sin_addr.s_addr != 0)
+		  {
+		    errno = 0;
+		    perror("start udp_relay()\n");
+		    udp_relay(cs, ss, &udp);
+		  }
+		else
+		  {
+		    errno = 0;
+		    perror("start relay()\n");
+		    relay(cs, ss);
+		  }
 
-		relay(cs, ss);
 		exit(0);
 
 	      default: /* may be parent */
@@ -574,13 +810,23 @@ serv_loop(void)
 #ifdef IPHONE_OS
 	    iphone_app_check_connection();
 #endif
-	    ss = proto_socks(cs);
+	    memset(&udp, 0, sizeof(udp));
+	    ss = proto_socks(cs, &udp);
 	    if ( ss == -1 )
 	      {
 		close(cs);  /* may already be closed */
 		continue;
 	      }
-	    relay(cs, ss);
+	    if (((struct sockaddr_in*)&udp)->sin_port != 0)
+	      {
+		errno = 0;
+		udp_relay(cs, ss, &udp);
+	      }
+	    else
+	      {
+		errno = 0;
+		relay(cs, ss);
+	      }
 	  }
 #endif
       }

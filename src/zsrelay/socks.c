@@ -50,26 +50,26 @@
 #define GEN_ERR_REP(s, v) \
   switch ((v)) { \
   case 0x04:\
-	    socks_rep((s), (v), S4EGENERAL, 0);\
+    socks_rep((s), (v), S4EGENERAL, 0);\
     break;\
   case 0x05:\
-	    socks_rep((s), (v), S5EGENERAL, 0);\
+    socks_rep((s), (v), S5EGENERAL, 0);\
     break;\
   default:\
-	  break;\
+    break;\
   }\
 close((s));
 
 #define POSITIVE_REP(s, v, a) \
   switch ((v)) { \
   case 0x04:\
-	    error = socks_rep((s), (v), S4AGRANTED, (a));\
+    error = socks_rep((s), (v), S4AGRANTED, (a));\
     break;\
   case 0x05:\
-	    error = socks_rep((s), (v), S5AGRANTED, (a));\
+    error = socks_rep((s), (v), S5AGRANTED, (a));\
     break;\
   default:\
-	  error = -1;\
+    error = -1;\
     break;\
   }\
 
@@ -93,9 +93,9 @@ int resolv_host __P((struct bin_addr *, u_int16_t, struct host_info *));
 int log_request __P((int, struct socks_req *, struct req_host_info *));
 int do_bind __P((int, struct addrinfo *, u_int16_t));
 int socks_rep __P((int , int , int , struct sockaddr *));
-int socks_direct_conn __P((int, struct socks_req *));
+int socks_direct_conn __P((int, struct socks_req *, struct sockaddr_storage *));
 int proto_socks4 __P((int));
-int proto_socks5 __P((int));
+int proto_socks5 __P((int, struct sockaddr_storage *));
 int s5auth_s __P((int));
 int s5auth_s_rep __P((int, int));
 int s5auth_c __P((int, int));
@@ -729,7 +729,7 @@ proto_socks:
 handle socks protocol.
 */
 int
-proto_socks(int s)
+proto_socks(int s, struct sockaddr_storage *udp)
 {
     u_char buf[128];
     int r;
@@ -741,6 +741,9 @@ proto_socks(int s)
 	close(s);
 	return(-1);
       }
+
+    if (udp != NULL)
+      bzero(udp, sizeof(struct sockaddr_storage));
 
     switch (buf[0])
       {
@@ -758,7 +761,7 @@ proto_socks(int s)
 
       case 5:
 	if ((r = s5auth_s(s)) == 0)
-	  r = proto_socks5(s);
+	  r = proto_socks5(s, udp);
 	break;
       default:
 	r = -1;
@@ -876,7 +879,7 @@ proto_socks4(int s)
     req.tbl_ind = lookup_tbl(&req);
     if (req.tbl_ind == proxy_tbl_ind /* do default */
 	|| proxy_tbl[req.tbl_ind].port == 0)
-      return(socks_direct_conn(4, &req));
+      return(socks_direct_conn(4, &req, NULL));
 
     return(proxy_connect(4, &req));
 }
@@ -884,7 +887,7 @@ proto_socks4(int s)
 
 /* socks5 protocol functions */
 int
-proto_socks5(int s)
+proto_socks5(int s, struct sockaddr_storage *udp)
 {
     u_char    buf[512];
     int     r, len;
@@ -965,10 +968,16 @@ proto_socks5(int s)
 	return(-1);
       }
 
+    if (req.req == S5REQ_UDPA)
+      {
+	/* XXX: proxy-chain support ist still missing */
+	return(socks_direct_conn(5, &req, udp));
+      }
+
     req.tbl_ind = lookup_tbl(&req);
     if (req.tbl_ind == proxy_tbl_ind /* do default */
 	|| proxy_tbl[req.tbl_ind].port == 0)
-      return(socks_direct_conn(5, &req));
+      return(socks_direct_conn(5, &req, NULL));
 
     return(proxy_connect(5, &req));
 }
@@ -1128,9 +1137,10 @@ s5auth_c(int s, int ind)
 }
 
 int
-socks_direct_conn(int ver, struct socks_req *req)
+socks_direct_conn(int ver, struct socks_req *req,
+		  struct sockaddr_storage *udp)
 {
-    int    cs, acs = 0;
+    int    cs, acs = 0, one = 1;
     int    len;
     struct addrinfo hints, *res, *res0;
     struct addrinfo ba;
@@ -1302,6 +1312,167 @@ socks_direct_conn(int ver, struct socks_req *req)
 	 *  we must check ss against req->dest here for security reason
 	 */
 	/* XXXXX */
+	break;
+
+      case S5REQ_UDPA:
+	/* get client info */
+
+	if (req->port == htons(0))
+	  {
+	    /* try guessing the client address */
+	    msg_out(warn, "UDP: need to guess clients address!\n");
+
+	    if (req->dest.atype == S5ATIPV6)
+	      {
+		len = sizeof(struct sockaddr_in6);
+		ss.ss_family = AF_INET6;
+	      }
+	    else
+	      {
+		len = sizeof(struct sockaddr_in);
+		ss.ss_family = AF_INET;
+	      }
+
+	    bzero(&ss, sizeof(struct sockaddr_storage));
+	    error = getpeername(req->s, (struct sockaddr*)&ss, &len);
+	    if (error != 0)
+	      {
+		msg_out(crit, "UDP: unable to guess client address: %s!\n",
+			strerror(errno));
+		GEN_ERR_REP(req->s, ver);
+		return(-1);
+	      }
+
+	    memcpy(udp, &ss, sizeof(struct sockaddr_storage));
+
+	    if (req->dest.atype == S5ATIPV6)
+	      {
+		struct sockaddr_in6 *udp_ip6 = NULL;
+
+		udp_ip6 = (struct sockaddr_in6*)udp;
+		memcpy(req->dest._addr._ip6.ip6, udp_ip6->sin6_addr.s6_addr,
+		       sizeof(udp_ip6->sin6_addr.s6_addr));
+		req->port = ntohs(((struct sockaddr_in6*)udp)->sin6_port);
+	      }
+	    else
+	      {
+		struct sockaddr_in *udp_ip4 = NULL;
+
+		udp_ip4 = (struct sockaddr_in*)udp;
+		memcpy(req->dest._addr.ip4, &udp_ip4->sin_addr.s_addr,
+		       sizeof(udp_ip4->sin_addr.s_addr));
+		req->port = ntohs(((struct sockaddr_in*)udp)->sin_port);
+	      }
+/*
+	    msg_out(norm, "UDP: client is %s:%d\n",
+		    inet_ntoa(((struct sockaddr_in*)udp)->sin_addr),
+		    ntohs(((struct sockaddr_in*)udp)->sin_port));
+*/
+	  }
+	else
+	  {
+	    if (req->dest.atype == S5ATIPV6)
+	      {
+		struct sockaddr_in6 *udp_ip6 = (struct sockaddr_in6*)udp;
+		memcpy(udp_ip6->sin6_addr.s6_addr, req->dest._addr._ip6.ip6,
+		       sizeof(udp_ip6->sin6_addr.s6_addr));
+
+		udp_ip6->sin6_port   = htons(req->port);
+		udp_ip6->sin6_family = AF_INET6;
+		udp_ip6->sin6_len    = sizeof(struct sockaddr_in6);
+	      }
+	    else
+	      {
+		struct sockaddr_in *udp_ip4 = (struct sockaddr_in*)udp;
+		udp_ip4->sin_addr.s_addr = *(in_addr_t*)&req->dest._addr.ip4;
+		udp_ip4->sin_port        = htons(req->port);
+		udp_ip4->sin_family      = AF_INET;
+		udp_ip4->sin_len        = sizeof(struct sockaddr_in);
+	      }
+	  }
+	cs = -1;
+	cs = socket(udp->ss_family, SOCK_DGRAM, 0);
+
+	bzero(&ss, sizeof(struct sockaddr_storage));
+	if (udp->ss_family == AF_INET6)
+	  {
+	    struct sockaddr_in6 *ss_ip6 = (struct sockaddr_in6*)&ss;
+	    ss_ip6->sin6_addr   = in6addr_any;
+	    ss_ip6->sin6_family = htons(0);
+	    ss_ip6->sin6_len    = sizeof(struct sockaddr_in6);
+	  }
+	else
+	  {
+	    struct sockaddr_in *ss_ip4 = (struct sockaddr_in*)&ss;
+	    ss_ip4->sin_addr.s_addr = htonl(INADDR_ANY);
+	    ss_ip4->sin_family      = AF_INET;
+	    ss_ip4->sin_port        = htons(0);
+	    ss_ip4->sin_len         = sizeof(struct sockaddr_in);
+	  }
+
+	save_errno = 0;
+	/* reuse ports */
+	if (setsockopt(cs, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) < 0)
+	  {
+	    save_errno = errno;
+	    close(cs);
+	    cs = -1;
+	  }
+
+	/* bind first free port */
+	len = sizeof(struct sockaddr_in);
+	if (bind(cs, (struct sockaddr*)&ss, len) < 0)
+	  {
+	    save_errno = errno;
+	    close(cs);
+	    cs = -1;
+	  }
+
+	/* get the new address */
+	if (udp->ss_family == AF_INET6)
+	  len = sizeof(struct sockaddr_in6);
+	else
+	  len = sizeof(struct sockaddr_in);
+
+	bzero(&ss, sizeof(struct sockaddr_storage));
+	error = getsockname(cs, (struct sockaddr*)&ss, &len);
+	if (error)
+	  {
+	    close(cs);
+	    GEN_ERR_REP(req->s, ver);
+	    return(-1);
+	  }
+
+	if (cs < 0 || save_errno != 0)
+	  {
+	    switch (ver)
+	      {
+	      case 0x05:
+		switch(save_errno)
+		  {
+		  case ENETUNREACH:
+		    socks_rep(req->s, 5, S5ENETURCH, 0);
+		    break;
+
+		  case ECONNREFUSED:
+		    socks_rep(req->s, 5, S5ECREFUSE, 0);
+		    break;
+#ifndef _POSIX_SOURCE
+		  case EHOSTUNREACH:
+		    socks_rep(req->s, 5, S5EHOSURCH, 0);
+		    break;
+#endif
+		  case ETIMEDOUT:
+		    socks_rep(req->s, 5, S5ETTLEXPR, 0);
+		    break;
+
+		  default:
+		    break;
+		  }
+		close(req->s);
+		return(-1);
+	      }
+	  }
 	break;
 
       default:
@@ -1597,8 +1768,8 @@ proxy_reply(int v, int cs, int ss, int req)
     int found = 0;
 
     /* v:
-4: 4 to 5,  5: 5 to 4
-*/
+       4: 4 to 5,  5: 5 to 4
+    */
 
     switch (req)
       {
