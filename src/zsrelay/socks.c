@@ -1347,27 +1347,34 @@ socks_direct_conn(int ver, struct socks_req *req,
 
 	    if (req->dest.atype == S5ATIPV6)
 	      {
+		char addr[INET6_ADDRSTRLEN];
 		struct sockaddr_in6 *udp_ip6 = NULL;
 
 		udp_ip6 = (struct sockaddr_in6*)udp;
 		memcpy(req->dest._addr._ip6.ip6, udp_ip6->sin6_addr.s6_addr,
 		       sizeof(udp_ip6->sin6_addr.s6_addr));
 		req->port = ntohs(((struct sockaddr_in6*)udp)->sin6_port);
+
+		inet_ntop(AF_INET6, udp_ip6, addr,sizeof(struct sockaddr_in6));
+		msg_out(norm, "UDP: client is IPv6 %s\n", addr);
+
+		udp_ip6->sin6_port = 0;
 	      }
 	    else
 	      {
+		char addr[INET_ADDRSTRLEN];
 		struct sockaddr_in *udp_ip4 = NULL;
 
 		udp_ip4 = (struct sockaddr_in*)udp;
 		memcpy(req->dest._addr.ip4, &udp_ip4->sin_addr.s_addr,
 		       sizeof(udp_ip4->sin_addr.s_addr));
 		req->port = ntohs(((struct sockaddr_in*)udp)->sin_port);
+
+		inet_ntop(AF_INET, udp_ip4, addr,sizeof(struct sockaddr_in));
+		msg_out(norm, "UDP: client is IPv4 %s\n", addr);
+
+		udp_ip4->sin_port = 0;
 	      }
-/*
-	    msg_out(norm, "UDP: client is %s:%d\n",
-		    inet_ntoa(((struct sockaddr_in*)udp)->sin_addr),
-		    ntohs(((struct sockaddr_in*)udp)->sin_port));
-*/
 	  }
 	else
 	  {
