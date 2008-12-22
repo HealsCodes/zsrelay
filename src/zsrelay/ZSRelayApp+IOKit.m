@@ -103,6 +103,7 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     switch (type)
       {
       case kIOMessageSystemWillSleep:
+      case kIOMessageSystemWillNotSleep:
 	IOAllowPowerChange(root_port, (long)argument);
 	break;
 
