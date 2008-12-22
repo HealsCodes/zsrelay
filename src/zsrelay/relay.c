@@ -222,6 +222,7 @@ udp_relay(int cs, int ss, struct sockaddr_storage *udp)
     struct socks_udpmsg *udpmsg = NULL;
 
     int is_clientmsg = 0;
+    int learn_client = 0;
 
 #ifdef IPHONE_OS
     pthread_mutex_lock(&stat_lock);
@@ -230,6 +231,22 @@ udp_relay(int cs, int ss, struct sockaddr_storage *udp)
 #endif
 
     sender.ss_family = udp->ss_family;
+    if (udp->ss_family == AF_INET6)
+      {
+	struct sockaddr_in6 *udp_ip6 = NULL;
+	udp_ip6 = (struct sockaddr_in6*)udp;
+
+	if (udp_ip6->sin6_port == 0)
+	    learn_client = 1;
+      }
+    else
+      {
+	struct sockaddr_in *udp_ip4 = NULL;
+	udp_ip4 = (struct sockaddr_in*)udp;
+
+	if (udp_ip4->sin_port == 0)
+	    learn_client = 1;
+      }
 
     errno = 0;
 
@@ -287,7 +304,9 @@ udp_relay(int cs, int ss, struct sockaddr_storage *udp)
 		    struct sockaddr_in *udp_ip4 = (struct sockaddr_in*)udp;
 		    struct sockaddr_in *sender_ip4 = (struct sockaddr_in*)&sender;
 
-		    if (sender_ip4->sin_port == udp_ip4->sin_port)
+		    if (bcmp(&sender_ip4->sin_addr.s_addr,
+			     &udp_ip4->sin_addr.s_addr,
+			     sizeof(udp_ip4->sin_addr)) == 0)
 		      is_clientmsg = 1;
 		  }
 		break;
@@ -297,7 +316,10 @@ udp_relay(int cs, int ss, struct sockaddr_storage *udp)
 		    struct sockaddr_in6 *udp_ip6 = (struct sockaddr_in6*)udp;
 		    struct sockaddr_in6 *sender_ip6 = (struct sockaddr_in6*)&sender;
 
-		    if (sender_ip6->sin6_port == udp_ip6->sin6_port)
+//		    if (sender_ip6->sin6_port == udp_ip6->sin6_port)
+		    if (bcmp(sender_ip6->sin6_addr.s6_addr,
+			     udp_ip6->sin6_addr.s6_addr,
+			     sizeof(udp_ip6->sin6_addr.s6_addr)) == 0)
 		      is_clientmsg = 1;
 		  }
 		break;
@@ -321,6 +343,15 @@ udp_relay(int cs, int ss, struct sockaddr_storage *udp)
 		remote.sin_len         = sizeof(remote);
 		addrlen = sizeof(remote);
 
+		if (learn_client == 1)
+		  {
+		    msg_out(norm, "UDP: client is sending on port %d\n",
+			    ntohs(((struct sockaddr_in*)&sender)->sin_port));
+		    ((struct sockaddr_in*)udp)->sin_port = ((struct sockaddr_in*)&sender)->sin_port;
+
+		    learn_client = 0;
+		  }
+
 		if (sendto(ss, &buf[SOCKS_UDPMSG_V4_SIZE(udpmsg)],
 			   recvlen - SOCKS_UDPMSG_V4_SIZE(udpmsg), 0,
 			   (struct sockaddr*)&remote, addrlen) < 0)
@@ -340,6 +371,14 @@ udp_relay(int cs, int ss, struct sockaddr_storage *udp)
 		remote.sin6_len    = sizeof(remote);
 		addrlen = sizeof(remote);
 
+		if (learn_client == 1)
+		  {
+		    msg_out(norm, "UDP: client is sending on port %d\n",
+			    ntohs(((struct sockaddr_in6*)&sender)->sin6_port));
+		    ((struct sockaddr_in6*)udp)->sin6_port = ((struct sockaddr_in6*)&sender)->sin6_port;
+
+		    learn_client = 0;
+		  }
 		if (sendto(ss, &buf[SOCKS_UDPMSG_V6_SIZE(udpmsg)],
 			   recvlen - SOCKS_UDPMSG_V6_SIZE(udpmsg), 0,
 			   (struct sockaddr*)&remote, addrlen) < 0)
@@ -381,6 +420,11 @@ udp_relay(int cs, int ss, struct sockaddr_storage *udp)
 		remote.sin6_len     = sizeof(remote);
 		addrlen = sizeof(remote);
 
+		if (learn_client == 1)
+		  {
+		    msg_out(warn, "UDP: dropping server message - client is unknown!\n");
+		    continue;
+		  }
 		if (sendto(ss, outbuf, recvlen + SOCKS_UDPMSG_V6_SIZE(udpmsg),
 			   0, (struct sockaddr*)&remote, addrlen) < 0)
 		  {
@@ -412,6 +456,11 @@ udp_relay(int cs, int ss, struct sockaddr_storage *udp)
 		remote.sin_len         = sizeof(remote);
 		addrlen = sizeof(remote);
 
+		if (learn_client == 1)
+		  {
+		    msg_out(warn, "UDP: dropping server message - client is unknown!\n");
+		    continue;
+		  }
 		if (sendto(ss, outbuf, recvlen + SOCKS_UDPMSG_V4_SIZE(udpmsg),
 			   0, (struct sockaddr*)&remote, addrlen) < 0)
 		  {
@@ -773,14 +822,16 @@ serv_loop(void)
 #ifdef IPHONE_OS
 		iphone_app_check_connection();
 #endif
-		memset(&udp, 0, sizeof(udp));
+		bzero(&udp, sizeof(struct sockaddr_storage));
+		udp.ss_family = AF_UNSPEC;
+
 		ss = proto_socks(cs, &udp);
 		if ( ss == -1 )
 		  {
 		    close(cs);  /* may already be closed */
 		    exit(1);
 		  }
-		if (((struct sockaddr_in*)&udp)->sin_addr.s_addr != 0)
+		if (udp.ss_family == AF_UNSPEC)
 		  {
 		    errno = 0;
 		    perror("start udp_relay()\n");
@@ -810,14 +861,16 @@ serv_loop(void)
 #ifdef IPHONE_OS
 	    iphone_app_check_connection();
 #endif
-	    memset(&udp, 0, sizeof(udp));
+	    bzero(&udp, sizeof(struct sockaddr_storage));
+	    udp.ss_family = AF_UNSPEC;
+
 	    ss = proto_socks(cs, &udp);
 	    if ( ss == -1 )
 	      {
 		close(cs);  /* may already be closed */
 		continue;
 	      }
-	    if (((struct sockaddr_in*)&udp)->sin_port != 0)
+	    if (udp.ss_family != AF_UNSPEC)
 	      {
 		errno = 0;
 		udp_relay(cs, ss, &udp);
