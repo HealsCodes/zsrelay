@@ -1,3 +1,11 @@
+org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@12) unstable; urgency=low
+
+  * full support for SOCKS5 UDP-Assoc
+  * Plugin architecture in PreferenceBundle (user customizable)
+  * minor bugfixes
+
+ -- René Köcher <shirk@bitspin.org>  Mon, 30 Mar 2009 22:27:48 +0200
+
 org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@11) unstable; urgency=low
 
   * Status Icons are back!!

@@ -50,6 +50,6 @@ dist-deb: pref-bundle
 			      -not -name 'Makefile' -exec cp -l '{}' misc/ ';'
 	@chmod +x debian/rules
 	@chmod +x tools/*
-	@SRCDIR=srcdir dpkg-buildpackage -nc -uc -us -rfakeroot -d
+	@SRCDIR=srcdir sudo dpkg-buildpackage -nc -uc -us -d
 endif
 
