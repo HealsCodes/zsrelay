@@ -36,6 +36,7 @@ pref-bundle: app-bundle
 	@echo "Creating preference bundle..."
 	@mkdir -p src/prefplug/ZSRelaySettings.bundle
 	@cp -r $(srcdir)/misc/Prefs/* src/prefplug/ZSRelaySettings.bundle/
+	@mv -f src/prefplug/ZSrelaySettings.bundle/ZSRelaySettings.plist src/prefplug/
 	@rm -r src/prefplug/ZSRelaySettings.bundle/plugins
 	@cp src/prefplug/ZSRelaySettings src/prefplug/ZSRelaySettings.bundle/
 	@echo "Creating plugin 'Demo.bundle'..."
@@ -45,6 +46,7 @@ pref-bundle: app-bundle
 
 dist-deb: pref-bundle
 	@cp -f $(srcdir)/debian/{pre,post}{inst,rm} debian/ || true
+	@cp -f $(srcdir)/debian/dirs                debian/ || false
 	@mkdir -p doc
 	@mkdir -p tools
 	@mkdir -p misc

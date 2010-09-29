@@ -56,6 +56,7 @@ dnl Checks for programs.
 GCC=yes
 AC_PROG_CC
 AC_PROG_OBJC
+AC_PROG_OBJCPP
 AC_PROG_RANLIB
 
 dnl Check for iPhone cross compile

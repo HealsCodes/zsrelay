@@ -153,8 +153,11 @@ iphone_app_main (void)
     printf("Springboard uid: %i\n", springboard_uid());
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    ZSRelayApp *app = [[ZSRelayApp alloc] init];
 
+    ZSRelayApp *app  = [[ZSRelayApp alloc] init];
+    UIApplication *uiApp = [UIApplication sharedApplication];
+
+    uiApp.delegate = app;
     [app applicationDidFinishLaunching:nil];
 
     while (1)
@@ -192,6 +195,8 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 
 -(void)applicationDidFinishLaunching:(id)unused
 {
+    NSLog(@"finishedLaunching");
+
     _connected = NO;
     _urlConnection = nil;
 
@@ -231,7 +236,7 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     NSLog(@"got settings.");
 
     NSLog(@"use status icons: %d", [self displayStatusIcons]);
-    [self showIcon:@"ZSRelay"];
+    [self showIcon:ZSStatusZSRelay];
 
     NSLog(@"use network keep alive: %d", [self networkKeepAlive]);
     if ([self networkKeepAlive] == YES)
@@ -240,18 +245,21 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	if ([self setNetworkKeepAlive:YES] == YES)
 	  {
 	    NSLog(@"hook registred");
-	    [self showIcon:@"ZSRelayInsomnia"];
+	    [self showIcon:ZSStatusZSInsomnia];
 	  }
 	else
 	  NSLog(@"failed to register hook");
       }
     if ([self sshOnLaunch] == YES)
       {
+	notify_post("com.sbsettings.enablessh");
+/*
 	FILE *fd = NULL;
 	fd = popen("/usr/sbin/zscmd ssh-on", "r");
 
 	if (fd != NULL)
 	  fclose(fd);
+*/
       }
 
     if ([[NetworkController sharedInstance] isEdgeUp] == YES)
@@ -259,9 +267,9 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	_connected = YES;
 
 	if ([self networkKeepAlive] == YES)
-	  [self showIcon:@"ZSRelayInsomnia"];
+	  [self showIcon:ZSStatusZSInsomnia];
 	else
-	  [self showIcon:@"ZSRelay"];
+	  [self showIcon:ZSStatusZSRelay];
       }
 }
 
@@ -275,11 +283,14 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 
     if ([self sshOnLaunch] == YES)
       {
+	notify_post("com.sbsettings.disablessh");
+/*
 	FILE *fd = NULL;
 	fd = popen("/usr/sbin/zscmd ssh-off", "r");
 
 	if (fd != NULL)
 	  fclose(fd);
+*/
       }
 }
 @end

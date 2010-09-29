@@ -23,6 +23,8 @@
 			<string>zsrelayEnabled</string>
 			<key>set</key>
 			<string>setDaemonEnabled:specifier:</string>
+			<key>get</key>
+			<string>getDaemonEnabled:</string>
 		</dict>
 		<dict>
 			<key>cell</key>

@@ -1,3 +1,26 @@
+org.bitspin.zsrelay (0.5.1-@IPHONE_ARCH_SUFFIX@2~test1) unstable; urgency=low
+
+  * Update icon handling to work with updated statusbridge.
+  * Reliable check for running zsrelay instanced added in prefs.
+
+ -- René Köcher <shirk@bitspin.org>  Tue, 23 Jun 2009 20:01:12 +0200
+
+org.bitspin.zsrelay (0.5.1-@IPHONE_ARCH_SUFFIX@1) unstable; urgency=low
+
+  * Updated to work with OS3.0
+  * replace old hacks
+  * display preferences using preferenceloader
+  * display status icons using statusbridge
+  * control zsrelay using sbsettings (no toggle yet, only bg-magic)
+
+ -- René Köcher <shirk@bitspin.org>  Mon, 22 Jun 2009 23:00:28 +0200
+
+org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@13~alpha1) unstable; urgency=low
+
+  * Version bump to fix repo versioning
+
+ -- René Köcher <shirk@bitspin.org>  Wed, 01 Apr 2009 19:26:48 +0200
+
 org.bitspin.zsrelay (0.5.0-@IPHONE_ARCH_SUFFIX@12beta2) unstable; urgency=low
 
   * Updated Plugin loader code

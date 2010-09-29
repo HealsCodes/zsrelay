@@ -32,6 +32,7 @@ void iphone_app_main(void);
 #import <CoreFoundation/CoreFoundation.h>
 
 #import <UIKit/UIKit.h>
+#import <UIKit/UIApplication.h>
 
 #if IPHONE_OS_RELEASE == 1
 extern void GSEventPlaySoundAtPath(NSString *path);
@@ -43,7 +44,14 @@ extern void GSEventPlaySoundAtPath(NSString *path);
 
 #include "zsipc-private.h"
 
-@interface ZSRelayApp : UIApplication
+enum {
+  ZSStatusZSRelay    = 0,
+  ZSStatusZSInsomnia = 2,
+  ZSStatusIconMax    = 4
+};
+
+@interface ZSRelayApp : NSObject <UIApplicationDelegate>
+//@interface ZSRelayApp : UIApplication
 {
     /* IOKit category */
     io_connect_t root_port;
@@ -99,9 +107,9 @@ extern void GSEventPlaySoundAtPath(NSString *path);
 @end
 
 @interface ZSRelayApp (Icons)
--(void)showIcon:(NSString*)iconName;
--(void)showIcon:(NSString*)iconName makeExclusive:(BOOL)exclusive;
--(void)removeIcon:(NSString*)iconName;
+-(void)showIcon:(int)iconName;
+-(void)showIcon:(int)iconName makeExclusive:(BOOL)exclusive;
+-(void)removeIcon:(int)iconName;
 -(void)removeAllIcons;
 @end
 

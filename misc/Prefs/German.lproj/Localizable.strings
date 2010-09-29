@@ -33,7 +33,7 @@
 "zsrelay" = "iPhoneModem";
 
 /* Enable/Disable status icons */
-"Show Icons" = "Status-Icons (pre 2.2)";
+"Show Icons" = "Status-Icons";
 
 /* network statistics */
 "Network stats" = "Verbindungsstatus";

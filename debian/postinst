@@ -3,28 +3,12 @@
 chown root:wheel /usr/sbin/zsrelay
 chown root:wheel /usr/sbin/zscmd
 chown root:wheel /Library/LaunchDaemons/org.bitspin.zsrelay.plist
+chown root:wheel /var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.* || true
+
 chmod +s /usr/sbin/zsrelay
 chmod +s /usr/sbin/zscmd
 
 chown mobile:wheel /Library/ZSRelay/ZSRelay.app/zsrelay
 chmod +s /Library/ZSRelay/ZSRelay.app/zsrelay
 
-/usr/sbin/zscmd install-plugin
-
-cat - <<EOS
-------------------------------------------
-             zserlay 0.5.0
-------------------------------------------
-
-This update to zsrelay introduces support for
-Extended Prefs. To integrate zsrelay into
-Extended Prefs you need to follow these steps:
-
-- Disable Extended Prefs
-- Switch to zsrelay-settings "advanced" tab
-- Activate the "Hook Extended Prefs" switch
-- Tapp "Refresh Plugin"
-- Reenable Extenden Prefs
-
-EOS
-
+killall sbsettingsd || true

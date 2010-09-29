@@ -23,63 +23,71 @@
 
 #import "ZSRelayApp.h"
 
+static const char *_statusIconNames[] = {
+	"org.bitspin.zsrelay.icons.ZSRelay",
+	"org.bitspin.zsrelay.icons.ZSRelayNOP",
+	"org.bitspin.zsrelay.icons.ZSRelayInsomnia",
+	"org.bitspin.zsrelay.icons.ZSRelayInsomniaNOP"
+};
+
 @implementation ZSRelayApp (Icons)
 
--(void)showIcon:(NSString*)iconName
+-(void)showIcon:(int)iconName
 {
     [self showIcon:iconName
      makeExclusive:YES];
 }
 
--(void)showIcon:(NSString*)iconName makeExclusive:(BOOL)exclusive
+-(void)showIcon:(int)iconName makeExclusive:(BOOL)exclusive
 {
-    NSMutableString *fullIconName = [iconName mutableCopy];
+    char name_buff[128];
+
     if ([self displayStatusIcons] == NO)
-      {
-	[fullIconName release];
 	return;
-      }
 
     if (_connected == NO)
-      [fullIconName appendString:@"NOP"];
+	iconName++;
+
+    if (!iconName || iconName > ZSStatusIconMax)
+      return;
 
     if (exclusive == YES)
       [self removeAllIcons];
 
-    if ([self respondsToSelector:@selector(addStatusBarImageNamed:removeOnAbnormalExit:)] == YES)
-      [self addStatusBarImageNamed:fullIconName
-	removeOnAbnormalExit:YES];
-    else
-      [self addStatusBarImageNamed:fullIconName
-	removeOnExit:NO];
-
-    [fullIconName release];
+    snprintf(name_buff, 128, "%s.show", _statusIconNames[iconName]);
+    NSLog(@"post notify(%s)", name_buff);
+    notify_post(name_buff);
 }
 
--(void)removeIcon:(NSString*)iconName
+-(void)removeIcon:(int)iconName
 {
-    NSMutableString *fullIconName = [iconName mutableCopy];
+    char name_buff[128];
 
     if ([self displayStatusIcons] == NO)
-      {
-	[fullIconName release];
 	return;
-      }
 
     if (_connected == NO)
-      [fullIconName appendString:@"NOP"];
+      iconName++;
 
-    NSLog(@"DisplayIcon: %@", fullIconName);
-    [self removeStatusBarImageNamed:fullIconName];
-    [fullIconName release];
+    if (!iconName || iconName > ZSStatusIconMax)
+      return;
+
+    snprintf(name_buff, 128, "%s.hide", _statusIconNames[iconName]);
+    NSLog(@"post notify(%s)", name_buff);
+    notify_post(name_buff);
 }
 
 -(void)removeAllIcons
 {
-    [self removeStatusBarImageNamed:@"ZSRelay"];
-    [self removeStatusBarImageNamed:@"ZSRelayNOP"];
-    [self removeStatusBarImageNamed:@"ZSRelayInsomnia"];
-    [self removeStatusBarImageNamed:@"ZSRelayInsomniaNOP"];
+    int i = 0;
+    char name_buff[128];
+
+    for (i = -1; i < ZSStatusIconMax; i++)
+      {
+	snprintf(name_buff, 128, "%s.hide", _statusIconNames[i]);
+	notify_post(name_buff);
+	usleep(1000);
+      }
 }
 @end
 

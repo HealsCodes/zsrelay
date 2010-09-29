@@ -41,13 +41,8 @@ install: build
 
 	# Add here commands to install the package into debian/<packagename>.
 	$(MAKE) prefix=$(DEBDESTDIR)/usr install
-	install -d $(DEBDESTDIR)/Library/LaunchDaemons
-	install -d $(DEBDESTDIR)/Library/ZSRelay/ZSRelay.app
-	install -d $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app
-	install -d $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle
-	install -d $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/English.lproj
-	install -d $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/German.lproj
 
+	install -m 0644 src/prefplug/ZSRelaySettings.plist $(DEBDESTDIR)/Library/PreferenceLoader/Preferences/
 	install -m 0755 misc/zswrapper $(DEBDESTDIR)/usr/sbin/zsrelay
 	install -m 0755 src/zsrelay/ZSRelay.app/* $(DEBDESTDIR)/Library/ZSRelay/ZSRelay.app/
 
@@ -55,9 +50,19 @@ install: build
 	chmod -R 0644 $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/
 	chmod    0755 $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/ZSRelaySettings
 
+	mkdir -p $(DEBDESTDIR)/Library/LaunchDaemons/
+	mkdir -p $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/
 	install -m 0755 misc/org.bitspin.zsrelay.plist $(DEBDESTDIR)/Library/LaunchDaemons/
 	install -m 0644 misc/FSO_*.png $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/
 	install -m 0644 misc/Default_*.png $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/
+
+	touch $(DEBDESTDIR)/var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.ZSRelay
+	touch $(DEBDESTDIR)/var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.ZSRelayNOP
+	touch $(DEBDESTDIR)/var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.ZSRelayInsomnia
+	touch $(DEBDESTDIR)/var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.ZSRelayInsomniaNOP
+
+	ln -sf /usr/sbin/zscmd $(DEBDESTDIR)/var/mobile/Library/SBSettings/Commands/org.bitspin.zsrelay.start
+	ln -sf /usr/sbin/zscmd $(DEBDESTDIR)/var/mobile/Library/SBSettings/Commands/org.bitspin.zsrelay.stop
 
 # Build architecture-independent files here.
 binary-indep: build install

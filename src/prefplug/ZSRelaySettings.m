@@ -29,6 +29,12 @@
 #include <sys/stat.h>
 #include <glob.h>
 
+#include <string.h>
+#include <errno.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
 #include "zsipc.h"
 
 #if IPHONE_OS_RELEASE >= 2
@@ -41,6 +47,7 @@
 
 
 /* Provide the fast enumeration prototypes */
+/*
 typedef struct {
    unsigned long state;
    id *itemsPtr;
@@ -52,7 +59,7 @@ typedef struct {
 -(NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState*)state
                                  objects:(id*)stackbuf count:(NSUInteger)len;
 @end
-
+*/
 /* Provide the informal interface plugin bundles may implement */
 @interface NSObject (ZSPrefPlugin)
 +(NSString*)singleEntry;
@@ -393,6 +400,36 @@ typedef struct {
     ZSSendCommand(_zsIPC, ZSMsgDoReConfig);
 }
 
+-(id)getDaemonEnabled:(id)specifier
+{
+    /* try to connect to zsrelay */
+    int sockfd;
+    struct sockaddr_in saddr;
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0)
+      {
+	NSLog(@"socket error: %s", strerror(errno));
+	return [NSNumber numberWithBool:NO];
+      }
+
+    bzero(&saddr, sizeof(saddr));
+    saddr.sin_family = AF_INET;
+    saddr.sin_port   = htons(1080);
+    saddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    if (connect(sockfd, (struct sockaddr*)&saddr, sizeof(saddr)) == 0)
+      {
+	NSLog(@"return status YES");
+	close(sockfd);
+	return [NSNumber numberWithBool:YES];
+      }
+
+    NSLog(@"return status NO");
+    close(sockfd);
+    return [NSNumber numberWithBool:NO];
+}
+
 -(void)setDaemonEnabled:(id)value specifier:(id)specifier
 {
     FILE *child_fd = NULL;
@@ -404,21 +441,27 @@ typedef struct {
 
     if (value == kCFBooleanTrue)
       {
-	NSLog(@"enabling zsrelay...");
+	NSLog(@"enabling zsrelay... [%d]",
+	      notify_post("org.bitspin.zsrelay.start"));
+#if 0
 	child_fd = popen("/usr/sbin/zscmd start", "r");
 	if (child_fd != NULL)
 	  {
 	    fclose(child_fd);
 	  }
+#endif
       }
     else
       {
-	NSLog(@"disabling zsrelay...");
+	NSLog(@"disabling zsrelay... [%d]",
+	      notify_post("org.bitspin.zsrelay.stop"));
+#if 0
 	child_fd = popen("/usr/sbin/zscmd stop", "r");
 	if (child_fd != NULL)
 	  {
 	    fclose(child_fd);
 	  }
+#endif
       }
 }
 
@@ -526,8 +569,10 @@ typedef struct {
 {
     return [NSString stringWithFormat:@"%ld", _connections];
 }
+
 -(void)prefplugButton:(id)sender
 {
+    /*
     FILE *child_fd = NULL;
 
     NSLog(@"enabling zsrelay...");
@@ -536,6 +581,7 @@ typedef struct {
       {
 	fclose(child_fd);
       }
+      */
 }
 @end
 

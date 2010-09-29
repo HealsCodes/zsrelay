@@ -18,13 +18,16 @@
 */
 
 #include <stdio.h>
+#include <libgen.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <Foundation/Foundation.h>
 
 #include "zsipc.h"
 
+#if 0
 static void insertPrefBundle(NSString* settingsFile);
 static void removePrefBundle(NSString* settingsFile);
+#endif
 
 int
 main (int argc, char **argv)
@@ -33,7 +36,21 @@ main (int argc, char **argv)
     ZSIPCRef zsIPC = ZSInitMessaging();
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    if (argc >= 2)
+    if (argc == 1)
+      {
+	printf("argv[0] = '%s'\n", argv[0]);
+
+	if (strcmp("org.bitspin.zsrelay.start", basename(argv[0])) == 0)
+	  {
+	    ret = system("/bin/launchctl load -w /Library/LaunchDaemons/org.bitspin.zsrelay.plist");
+	  }
+	else if (strcmp("org.bitspin.zsrelay.stop", basename(argv[0])) == 0)
+	  {
+	    ZSSendCommand(zsIPC, ZSMsgDoTerminate);
+	    ret = system("/bin/launchctl unload -w /Library/LaunchDaemons/org.bitspin.zsrelay.plist");
+	  }
+      }
+    else if (argc >= 2)
       {
 	if (strncmp("start", argv[1], 4) == 0)
 	  {
@@ -66,56 +83,19 @@ main (int argc, char **argv)
 	  }
 	else if(strncmp("install-plugin", argv[1], 14) == 0)
 	  {
-#define kKeyHookExtPrefs CFSTR("hookExtPrefs")
-#define kAppZSRelay      CFSTR("org.bitspin.zsrelay")
-
-	    long val = 0;
-	    CFNumberRef hookExtPrefs = NULL;
-
-	    // no I'm no proud of this.. but it works for now
-	    system("cp /var/mobile/Library/Preferences/org.bitspin.zsrelay.plist /var/root/Library/Preferences/");
-
-	    hookExtPrefs = CFPreferencesCopyAppValue(kKeyHookExtPrefs, kAppZSRelay);
-
-	    if (hookExtPrefs == NULL)
-	      {
-		NSLog(@"Unable to cross read hookExtPrefs setting!");
-		val = 0;
-	      }
-	    else
-	      {
-		(void)CFNumberGetValue(hookExtPrefs, kCFNumberIntType, &val);
-		CFRelease(hookExtPrefs);
-	      }
-
-	    insertPrefBundle(@"/Applications/Preferences.app/Settings-iPhone.plist");
-	    insertPrefBundle(@"/Applications/Preferences.app/Settings-iPod.plist");
-
-	    if (val == 1)
-	      {
-		insertPrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPhone.plist");
-		insertPrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPod.plist");
-	      }
-	    else
-	      {
-		removePrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPhone.plist");
-		removePrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPod.plist");
-	      }
+	    ;
 	  }
 	else if(strncmp("remove-plugin", argv[1], 13) == 0)
 	  {
-	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPhone.plist");
-	    removePrefBundle(@"/Applications/Preferences.app/Settings-iPod.plist");
-	    removePrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPhone.plist");
-	    removePrefBundle(@"/Library/Themes/Extended Preferences.theme/Bundles/com.apple.Preferences/Settings-iPod.plist");
+	    ;
 	  }
 	if (strncmp("ssh-on", argv[1], 7) == 0)
 	  {
-	    ret = system("/bin/launchctl load /Library/LaunchDaemons/com.openssh.sshd.plist");
+	    ;
 	  }
 	else if (strncmp("ssh-off", argv[1], 7) == 0)
 	  {
-	    ret = system("/bin/launchctl unload /Library/LaunchDaemons/com.openssh.sshd.plist");
+	    ;
 	  }
 	ret = 0;
       }
@@ -126,68 +106,11 @@ main (int argc, char **argv)
 		"  start/stop     - start / stop zsrelay\n"
 		"  status         - poll and display traffic stats\n"
 		"  reconf         - trigger config reload\n"
-		"\n"
-		"  install-plugin - install preference bundle\n"
-		"  remove-plugin  - remove preference bundle\n"
-		"  ssh-on/ssh-off - star / stop ssh daemon\n",
+		"\n",
 		argv[0]);
       }
     ZSDestroy(zsIPC);
     [pool release];
     return ret;
-}
-
-/* thanks to scrobbled 2.0 */
-void
-insertPrefBundle(NSString *settingsFile)
-{
-    int i;
-    NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile: settingsFile];
-
-    for(i = 0; i < [[settings objectForKey:@"items"] count]; i++)
-      {
-	NSDictionary *entry = [[settings objectForKey:@"items"] objectAtIndex: i];
-
-	if([[entry objectForKey:@"bundle"] isEqualToString:@"ZSRelaySettings"])
-	  {
-	    printf("Preferences plugin already installed.\n");
-	    return;
-	  }
-      }
-
-    printf("Registring preferences plugin.\n");
-
-    [[settings objectForKey:@"items"] insertObject:
-      [NSDictionary dictionaryWithObjectsAndKeys:
-	@"PSLinkCell", @"cell",
-	@"ZSRelaySettings", @"bundle",
-	@"iPhoneModem", @"label",
-	[NSNumber numberWithInt: 1], @"isController",
-	[NSNumber numberWithInt: 1], @"hasIcon",
-	nil] atIndex: [[settings objectForKey:@"items"] count] - 1];
-
-    [settings writeToFile:settingsFile
-	       atomically:YES];
-}
-
-void
-removePrefBundle(NSString *settingsFile)
-{
-    int i;
-    NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile: settingsFile];
-
-    for(i = 0; i < [[settings objectForKey:@"items"] count]; i++)
-      {
-	NSDictionary *entry = [[settings objectForKey:@"items"] objectAtIndex: i];
-
-	if([[entry objectForKey:@"bundle"] isEqualToString:@"ZSRelaySettings"])
-	  {
-	    printf("Removing preferences plugin.\n");
-	    [[settings objectForKey:@"items"] removeObjectAtIndex: i];
-	    i--;
-	  }
-      }
-
-    [settings writeToFile:settingsFile atomically:YES];
 }
 

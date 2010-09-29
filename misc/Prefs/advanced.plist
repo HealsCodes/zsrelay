@@ -54,6 +54,7 @@
 			<key>set</key>
 			<string>setPrefVal:specifier:</string>
 		</dict>
+<!--
 		<dict>
 			<key>cell</key>
 			<string>PSSwitchCell</string>
@@ -66,6 +67,7 @@
 			<key>key</key>
 			<string>hookExtPrefs</string>
 		</dict>
+-->
 		<dict>
 			<key>cell</key>
 			<string>PSEditTextCell</string>
@@ -82,6 +84,7 @@
 			<key>noAutoCorret</key>
 			<integer>1</integer>
 		</dict>
+<!--
 		<dict>
 			<key>action</key>
 			<string>prefplugButton:</string>
@@ -92,20 +95,19 @@
 			<key>label</key>
 			<string>Refresh Plugin</string>
 		</dict>
+-->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>isStaticText</key>
 			<true/>
 		</dict>
-<!--
 		<dict>
 			<key>cell</key>
 			<string>PSTitleValueCell</string>
 			<key>label</key>
 			<string>This URL will be polled to keep your connection happy.</string>
 		</dict>
--->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>

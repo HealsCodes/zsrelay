@@ -1,10 +1,9 @@
 Source: org.bitspin.zsrelay@IPHONE_PKG_SUFFIX@
 Section: devel
-Maintainer: Rene Koecher (shirk) <shirk@bitspin.org>
+Maintainer: Shirk <shirk@bitspin.org>
 Standards-Version: 2.1.2.2
 
 Package: org.bitspin.zsrelay@IPHONE_PKG_SUFFIX@
-#Version: 0.5.0-@IPHONE_ARCH_SUFFIX@9
 Architecture: @IPHONE_OS_ARCH@
 Description: zsrelay is an extended port of srelay.
  To put it short zsrelay is tuned for the iPhone.
@@ -13,12 +12,14 @@ Description: zsrelay is an extended port of srelay.
  - network keep alive (keep EDGE connected)
  - automatic start/stop of ssh daemon
  - integration into Preferences.app
+ - integration into Preferences.app
  - live trafic monitoring in preferences
  - configurable status icons
 Name: zsrelay
 Homepage: http://bitspin.org/
-Recommends: org.bitspin.zsrelay-control
 Replaces: org.bitspinn.zsrelay
-Maintainer: Rene Koecher (shirk) <shirk@bitspin.org>
-Author: Rene Koecher (shirk) <shirk@bitspin.org>
+Maintainer: Shirk <shirk@bitspin.org>
+Author: Shirk <shirk@bitspin.org>
 Section: Networking
+Depends: preferenceloader, sbsettingstoggles (>= 2.99-2)
+

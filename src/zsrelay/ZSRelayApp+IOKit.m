@@ -136,9 +136,9 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
       {
 	_connected = NO;
 	if ([self networkKeepAlive] == YES)
-	  [self showIcon:@"ZSRelayInsomnia"];
+	  [self showIcon:ZSStatusZSInsomnia];
 	else
-	  [self showIcon:@"ZSRelay"];
+	  [self showIcon:ZSStatusZSRelay];
       }
 
     NSLog(@"Sending synchronous keep alive to %@", [self keepAliveURI]);
@@ -169,9 +169,9 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 	_connected = YES;
 
 	if ([self networkKeepAlive] == YES)
-	  [self showIcon:@"ZSRelayInsomnia"];
+	  [self showIcon:ZSStatusZSInsomnia];
 	else
-	  [self showIcon:@"ZSRelay"];
+	  [self showIcon:ZSStatusZSInsomnia];
       }
 
     [pool release];
@@ -192,9 +192,9 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
       {
 	_connected = NO;
 	if ([self networkKeepAlive] == YES)
-	  [self showIcon:@"ZSRelayInsomnia"];
+	  [self showIcon:ZSStatusZSInsomnia];
 	else
-	  [self showIcon:@"ZSRelay"];
+	  [self showIcon:ZSStatusZSRelay];
       }
 
     NSLog(@"Sending keep alive to %@", [self keepAliveURI]);
@@ -216,9 +216,9 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 	  [error localizedDescription]);
 
     if ([self networkKeepAlive] == YES)
-      [self showIcon:@"ZSRelayInsomnia"];
+      [self showIcon:ZSStatusZSInsomnia];
     else
-      [self showIcon:@"ZSRelay"];
+      [self showIcon:ZSStatusZSRelay];
 
     [theConnection release];
     _urlConnection = nil;
@@ -234,9 +234,9 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     NSLog(@"keep alive successful");
 
     if ([self networkKeepAlive] == YES)
-      [self showIcon:@"ZSRelayInsomnia"];
+      [self showIcon:ZSStatusZSInsomnia];
     else
-      [self showIcon:@"ZSRelay"];
+      [self showIcon:ZSStatusZSRelay];
 
     [theConnection release];
     _urlConnection = nil;

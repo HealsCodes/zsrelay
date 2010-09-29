@@ -57,6 +57,7 @@
 
 -(void)triggerReConfig;
 
+-(id)getDaemonEnabled:(id)specifier;
 -(void)setDaemonEnabled:(id)value specifier:(id)specifier;
 -(void)setPrefVal:(id)value specifier:(id)specifier;
 
