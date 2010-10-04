@@ -1,0 +1,8 @@
+Library/ZSRelay/ZSRelay.app
+Library/LaunchDaemons/
+Library/PreferenceLoader/Preferences
+Library/PreferenceBundles/ZSRelaySettings.bundle
+Library/PreferenceBundles/ZSRelaySettings.bundle/English.lproj
+Library/PreferenceBundles/ZSRelaySettings.bundle/German.lproj
+System/Library/CoreServices/SpringBoard.app
+var/mobile/Library/SBSettings/Commands
