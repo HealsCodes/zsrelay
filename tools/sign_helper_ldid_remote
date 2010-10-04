@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ -z "$LDID_REMOTE_HOST" ];
+then
+	echo "Please set the LDID_REMOTE_HOST environment variable!" >&2
+	exit 1
+fi
+
+echo "ldid remote, preparing $1.."
+read -p "Password for $LDID_REMOTE_HOST: " -r -s password
+echo
+
+cp "$1" "${1}_"
+expect -n >/dev/null <<EOS
+
+spawn ssh $LDID_REMOTE_HOST rm -f /tmp/$(basename $1)
+expect "*?assword:*"
+send -- "$password\r"
+send -- "\r"
+expect EOF
+
+spawn scp "$1" $LDID_REMOTE_HOST:/tmp/
+expect "*?assword:*"
+send -- "$password\r"
+send -- "\r"
+expect EOF
+
+spawn ssh $LDID_REMOTE_HOST ldid -S /tmp/$(basename $1)
+expect "*?assword:*"
+send -- "$password\r"
+send -- "\r"
+expect EOF
+
+spawn scp $LDID_REMOTE_HOST:/tmp/$(basename $1) "$1"
+expect "*?assword:*"
+send -- "$password\r"
+send -- "\r"
+expect EOF
+EOS
+
