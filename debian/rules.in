@@ -6,8 +6,10 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
-
-DEBDESTDIR=`pwd`/debian/tmp/
+export DH_COMPAT=5
+export DH_OPTIONS=-porg.bitspin.zsrelay
+export DEB_HOST_ARCH=@IPHONE_OS_ARCH@
+DEBDESTDIR=`pwd`/debian/org.bitspin.zsrelay
 #`dh_listpackages`/
 ifndef IPHONE_IP
 IPHONE_IP=192.168.2.1
@@ -37,7 +39,7 @@ install: build
 	dh_testdir
 	dh_testroot
 	dh_prep
-	dh_installdirs
+	dh_installdirs -v --all -p`dh_listpackages`
 
 	# Add here commands to install the package into debian/<packagename>.
 	$(MAKE) prefix=$(DEBDESTDIR)/usr install
@@ -46,9 +48,9 @@ install: build
 	install -m 0755 misc/zswrapper $(DEBDESTDIR)/usr/sbin/zsrelay
 	install -m 0755 src/zsrelay/ZSRelay.app/* $(DEBDESTDIR)/Library/ZSRelay/ZSRelay.app/
 
-	cp -r src/prefplug/ZSRelaySettings.bundle/* $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/
-	chmod -R 0644 $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/
-	chmod    0755 $(DEBDESTDIR)/System/Library/PreferenceBundles/ZSRelaySettings.bundle/ZSRelaySettings
+	cp -r src/prefplug/ZSRelaySettings.bundle/* $(DEBDESTDIR)/Library/PreferenceBundles/ZSRelaySettings.bundle/
+	chmod -R 0644 $(DEBDESTDIR)/Library/PreferenceBundles/ZSRelaySettings.bundle/
+	chmod    0755 $(DEBDESTDIR)/Library/PreferenceBundles/ZSRelaySettings.bundle/ZSRelaySettings
 
 	mkdir -p $(DEBDESTDIR)/Library/LaunchDaemons/
 	mkdir -p $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/
@@ -56,18 +58,13 @@ install: build
 	install -m 0644 misc/FSO_*.png $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/
 	install -m 0644 misc/Default_*.png $(DEBDESTDIR)/System/Library/CoreServices/SpringBoard.app/
 
-	touch $(DEBDESTDIR)/var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.ZSRelay
-	touch $(DEBDESTDIR)/var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.ZSRelayNOP
-	touch $(DEBDESTDIR)/var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.ZSRelayInsomnia
-	touch $(DEBDESTDIR)/var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.ZSRelayInsomniaNOP
-
 	ln -sf /usr/sbin/zscmd $(DEBDESTDIR)/var/mobile/Library/SBSettings/Commands/org.bitspin.zsrelay.start
 	ln -sf /usr/sbin/zscmd $(DEBDESTDIR)/var/mobile/Library/SBSettings/Commands/org.bitspin.zsrelay.stop
 
 # Build architecture-independent files here.
 binary-indep: build install
-	dh_testdir
-	dh_testroot
+#	dh_testdir
+#	dh_testroot
 #	dh_installchangelogs
 #	dh_installdocs
 #	dh_installexamples
@@ -92,8 +89,8 @@ binary-indep: build install
 #	dh_perl
 #	dh_python
 	dh_installdeb
-#	dh_gencontrol
-	./tools/dpkg-gencontrol -a@IPHONE_OS_ARCH@ -p`dh_listpackages`
+	dpkg-gencontrol -P$(DEBDESTDIR)
+#	./tools/dpkg-gencontrol -a@IPHONE_OS_ARCH@ -p`dh_listpackages`
 	dh_md5sums
 	dh_builddeb
 # Build architecture-dependent files here.
