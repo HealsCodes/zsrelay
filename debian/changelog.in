@@ -1,3 +1,18 @@
+org.bitspin.zsrelay (0.5.2-@IPHONE_ARCH_SUFFIX@2) unstable; urgency=low
+
+  * remove old "hackerish" code (e.g. IOCancelPowerChange, statusbridge ...)
+  * remove plugin code from preference bundle
+  * check connectivity using SDK methods from SystemConfiguration framework
+  * replace IOCancelPowerChange with IOPMAssertions - the old method did
+      cause random reboots on iOS4..
+  * display status icons using libstatusbar and StatusBarAccess,
+      this should keep the code future safe
+  * update preference bundle to iOS4 _specifiers model
+  * add 'legacy' preference support (only two more supported calls ;) )
+  * Known bugs: WiFi will shutdown after 30 minutes even in 'Insomnia' mode
+
+ -- René Köcher <shirk@bitspin.org>  Mon,  4 Oct 2010 19:31:21 +0200
+
 org.bitspin.zsrelay (0.5.1-@IPHONE_ARCH_SUFFIX@2~test1) unstable; urgency=low
 
   * Update icon handling to work with updated statusbridge.
