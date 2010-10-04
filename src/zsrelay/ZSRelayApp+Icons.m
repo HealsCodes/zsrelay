@@ -24,10 +24,10 @@
 #import "ZSRelayApp.h"
 
 static const char *_statusIconNames[] = {
-	"org.bitspin.zsrelay.icons.ZSRelay",
-	"org.bitspin.zsrelay.icons.ZSRelayNOP",
-	"org.bitspin.zsrelay.icons.ZSRelayInsomnia",
-	"org.bitspin.zsrelay.icons.ZSRelayInsomniaNOP"
+	"ZSRelay",
+	"ZSRelayNOP",
+	"ZSRelayInsomnia",
+	"ZSRelayInsomniaNOP"
 };
 
 @implementation ZSRelayApp (Icons)
@@ -40,52 +40,53 @@ static const char *_statusIconNames[] = {
 
 -(void)showIcon:(int)iconName makeExclusive:(BOOL)exclusive
 {
-    char name_buff[128];
+    NSString *name = nil;
 
     if ([self displayStatusIcons] == NO)
 	return;
 
-    if (_connected == NO)
+    if (_connected == NO && iconName % 2 != 0)
 	iconName++;
 
-    if (!iconName || iconName > ZSStatusIconMax)
+    if (iconName > ZSStatusIconMax)
       return;
 
     if (exclusive == YES)
       [self removeAllIcons];
 
-    snprintf(name_buff, 128, "%s.show", _statusIconNames[iconName]);
-    NSLog(@"post notify(%s)", name_buff);
-    notify_post(name_buff);
+    [self sendSBAMessage:SBA_AddStatusBarImage
+                    data:(uint8_t*)_statusIconNames[iconName]
+                     len:strlen(_statusIconNames[iconName])];
 }
 
 -(void)removeIcon:(int)iconName
 {
-    char name_buff[128];
-
+    NSString *name = nil;
     if ([self displayStatusIcons] == NO)
 	return;
 
-    if (_connected == NO)
+    if (_connected == NO && iconName % 2 != 0)
       iconName++;
 
-    if (!iconName || iconName > ZSStatusIconMax)
+    if (iconName > ZSStatusIconMax)
       return;
 
-    snprintf(name_buff, 128, "%s.hide", _statusIconNames[iconName]);
-    NSLog(@"post notify(%s)", name_buff);
-    notify_post(name_buff);
+    [self sendSBAMessage:SBA_RemoveStatusBarImage
+                    data:(uint8_t*)_statusIconNames[iconName]
+                     len:strlen(_statusIconNames[iconName])];
 }
 
 -(void)removeAllIcons
 {
     int i = 0;
-    char name_buff[128];
+    NSString *name = nil;
 
-    for (i = -1; i < ZSStatusIconMax; i++)
+    for (i = 0; i < ZSStatusIconMax; i++)
       {
-	snprintf(name_buff, 128, "%s.hide", _statusIconNames[i]);
-	notify_post(name_buff);
+	[self sendSBAMessage:SBA_RemoveStatusBarImage
+                        data:(uint8_t*)_statusIconNames[i]
+                         len:strlen(_statusIconNames[i])];
+
 	usleep(1000);
       }
 }

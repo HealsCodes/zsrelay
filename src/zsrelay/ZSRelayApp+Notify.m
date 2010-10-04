@@ -110,5 +110,24 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     AudioServicesPlaySystemSound(_connectSound);
 #endif
 }
+/* SpringBoardAccess */
+#if IPHONE_OS_RELEASE >= 4
+-(BOOL)sendSBAMessage:(UInt8)message data:(UInt8*)data len:(CFIndex)len
+{
+    CFDataRef dataPkg = NULL;
+
+    if (!_sbaMessagePort)
+      _sbaMessagePort = CFMessagePortCreateRemote(NULL, CFSTR(SBA_MessagePortName));
+
+    if (!_sbaMessagePort)
+      return FALSE;
+
+    dataPkg = CFDataCreate(NULL, data, len);
+    CFMessagePortSendRequest(_sbaMessagePort, message, dataPkg, 1, 1, NULL, NULL);
+    CFRelease(dataPkg);
+
+    return TRUE;
+}
+#endif
 @end
 
