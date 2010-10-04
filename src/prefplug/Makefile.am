@@ -1,7 +1,7 @@
 noinst_PROGRAMS = ZSRelaySettings Demo
 
 DEFS += -DSYSCONFDIR="\"$(sysconfdir)\""
-INCLUDES = -I$(srcdir)/../zsipc
+INCLUDES = -I$(srcdir)/../zsipc -I$(srcdir)/../../compat/include -I$(sysroot)/Library/Frameworks/UIKit.framework/Headers
 
 ZSRelaySettings_SOURCES = ZSRelaySettings.m
 ZSRelaySettings_LDADD = @LIBS@ -lobjc -lzsipc

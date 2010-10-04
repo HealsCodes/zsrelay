@@ -37,16 +37,11 @@
 }
 -(NSArray *)localizedSpecifiersForSpecifiers:(NSArray *)s;
 -(id)navigationTitle;
--(NSArray*)updateSpecifiers:(NSArray*)mySpecifiers withBundles:(NSArray*)bundleList;
 @end
 
 @interface ZSRelaySettings : LocalizedListController
 {
     ZSIPCRef _zsIPC;
-#if IPHONE_OS_RELEASE >= 2
-    NSMutableArray *_pluginBundles;
-    int _pluginsTotal;
-#endif
     NSArray *_cachedSpecifiers;
 }
 
@@ -69,6 +64,7 @@
     long _trafficIn;
     long _trafficOut;
     long _connections;
+    NSTimer *_refreshTimer;
 
     ZSIPCRef _zsIPC;
 }
@@ -77,6 +73,13 @@
 
 -(NSArray *)specifiers;
 
+-(void)viewDidAppear:(BOOL)animated;
+-(void)viewDidDisappear:(BOOL)animated;
+
+/* legacy iOS < 4 specifiers */
+-(void)viewDidBecomeVisible;
+-(void)suspend;
+
 -(void)pollTrafficStats:(NSTimer*)aTimer;
 -(NSString*)getTrafficIn:(id)sender;
 -(NSString*)getTrafficOut:(id)sender;
@@ -84,21 +87,6 @@
 
 -(NSString*)getFormatedTraffic:(long)trafficStat;
 @end
-
-#if IPHONE_OS_RELEASE >= 2
-@interface PluginsController : LocalizedListController
-{
-}
-
--(id)initForContentSize:(struct CGSize)size;
--(void)dealloc;
-
--(NSArray*)specifiers;
-
--(void)setPrefVal:(id)value specifier:(id)specifier;
-#endif
-@end
-
 
 #endif /* __ZSRELAY_SETTINGS_H 1 */
 

@@ -83,6 +83,8 @@
 			<string>setPrefVal:specifier:</string>
 			<key>noAutoCorret</key>
 			<integer>1</integer>
+			<key>isURL</key>
+			<true/>
 		</dict>
 <!--
 		<dict>
@@ -101,22 +103,10 @@
 			<string>PSGroupCell</string>
 			<key>isStaticText</key>
 			<true/>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSTitleValueCell</string>
 			<key>label</key>
 			<string>This URL will be polled to keep your connection happy.</string>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
-			<key>isStaticText</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSTitleValueCell</string>
+			<key>alignment</key>
+			<integer>1</integer>
 		</dict>
 	</array>
 	<key>title</key>

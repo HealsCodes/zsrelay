@@ -65,14 +65,10 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<key>isStaticText</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSTitleValueCell</string>
 			<key>label</key>
 			<string>ID_INSOMNIA_BATTERY_WARNING</string>
+			<key>alignment</key>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -86,11 +82,20 @@
 			<key>label</key>
 			<string>ID_LINK_ADVANCED</string>
 		</dict>
+                <dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>isStaticText</key>
+                        <true/>
+		</dict>
+
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>ID_ZSRELAY_PROMO</string>
+			<key>alignment</key>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>action</key>
@@ -101,16 +106,6 @@
 			<true/>
 			<key>label</key>
 			<string>ID_BUTTON_SUPPORT_ZSRELAY</string>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
-			<key>isStaticText</key>
-			<true/>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSTitleValueCell</string>
 		</dict>
 	</array>
 	<key>title</key>

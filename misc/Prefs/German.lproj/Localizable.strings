@@ -13,7 +13,7 @@
 "ID_SSH_QUICKLAUNCH" = "SSH laden";
 
 /* battery notice */
- "ID_INSOMNIA_BATTERY_WARNING" = "Durch den Insomnia-Modus wird die Batterielaufzeit stark verkürzt!";
+"ID_INSOMNIA_BATTERY_WARNING" = "Durch den Insomnia-Modus wird die Batterielaufzeit stark verkürzt!";
 
 /* advanced settings */
 "ID_LINK_ADVANCED" = "Erweitert";

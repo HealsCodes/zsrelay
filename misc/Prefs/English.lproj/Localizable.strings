@@ -13,7 +13,7 @@
 "ID_SSH_QUICKLAUNCH" = "SSH on launch";
 
 /* battery notice */
- "ID_INSOMNIA_BATTERY_WARNING" = "Please note that Insomnia mode will drain your battery.";
+"ID_INSOMNIA_BATTERY_WARNING" = "Please note that Insomnia mode will drain your battery.";
 
 /* advanced settings */
 "ID_LINK_ADVANCED" = "Advanced";

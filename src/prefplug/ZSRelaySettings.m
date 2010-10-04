@@ -37,37 +37,6 @@
 
 #include "zsipc.h"
 
-#if IPHONE_OS_RELEASE >= 2
-#define PREFS_BUNDLE_PATH "/System/Library/PreferenceBundles/ZSRelaySettings.bundle/plugins/*.bundle"
-#define PREFS_BUNDLE_DISABLED_PATH "/System/Library/PreferenceBundles/ZSRelaySettings.bundle/plugins/*.bundle_disabled"
-
-#define PSGROUP_CELLID    0
-#define PSLINKLIST_CELLID 1
-#define PSSWITCH_CELLID   6
-
-
-/* Provide the fast enumeration prototypes */
-/*
-typedef struct {
-   unsigned long state;
-   id *itemsPtr;
-   unsigned long *mutationsPtr;
-   unsigned long extra[5];
-} NSFastEnumerationState;
-
-@interface NSArray (FastEnumeration)
--(NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState*)state
-                                 objects:(id*)stackbuf count:(NSUInteger)len;
-@end
-*/
-/* Provide the informal interface plugin bundles may implement */
-@interface NSObject (ZSPrefPlugin)
-+(NSString*)singleEntry;
-+(NSArray*)entryList;
-+(NSString*)insertAfter;
-+(NSArray*)disableMenuItems;
-@end
-#endif
 
 @implementation LocalizedListController
 -(NSArray*)localizedSpecifiersForSpecifiers:(NSArray*)s
@@ -100,178 +69,11 @@ typedef struct {
 
 -(id)navigationTitle
 {
-  return [[self bundle] localizedStringForKey:_title
-                                        value:_title
+  return [[self bundle] localizedStringForKey:[self title]
+                                        value:[self title]
                                         table:nil];
 }
-
-#if IPHONE_OS_RELEASE >= 2
--(NSArray*)updateSpecifiers:(NSArray*)mySpecifiers withBundles:(NSArray*)bundleList
-{
-    NSMutableArray *s = [mySpecifiers mutableCopy];
-
-    /* first walk - insert plugin bundles into desired locations */
-    for (NSBundle *bundle in bundleList)
-      {
-	int offset = -1;
-	NSString *name = nil;
-	PSSpecifier *specifier = nil;
-
-	Class bundleClass = [bundle principalClass];
-
-	if ([bundleClass respondsToSelector:@selector(insertAfter)])
-	  {
-	    BOOL match = NO;
-	    offset = [s count] -1;
-
-	    while (offset >= 0)
-	      {
-		PSSpecifier *sp = [s objectAtIndex:offset];
-
-		if ([[sp propertyForKey:@"id"] isEqualToString:[bundleClass insertAfter]])
-		  {
-		    match = YES;
-		    break;
-		  }
-
-		offset--;
-	      }
-
-	    if (match)
-	      offset++;
-	  }
-
-	if (offset == -1)
-	  offset = [s count] - 2;
-
-	if ([bundleClass respondsToSelector:@selector(singleEntry)])
-	  {
-	    name = [NSString stringWithString:[bundleClass singleEntry]];
-	    name = [NSString stringWithFormat:@"%@", [bundle principalClass]];
-
-	    specifier = [PSSpecifier preferenceSpecifierNamed:name
-	                                               target:nil
-	                                                  set:nil
-	                                                  get:nil
-	                                               detail:[bundle principalClass]
-	                                                 cell:PSLINKLIST_CELLID
-	                                                 edit:nil];
-
-	    /* add a icon tag to each plugin */
-	    NSString *iconPath = nil;
-	    NSString *iconName = nil;
-
-	    iconPath = [bundle pathForResource:@"icon"
-	                                ofType:@"png"];
-	    iconName = @"icon.png";
-
-	    if (iconPath == nil)
-	      {
-		  iconPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"pref_plugin"
-		                                                              ofType:@"png"];
-		  iconName = @"pref_plugin.png";
-	      }
-
-	    if (iconPath != nil)
-	      {
-		[specifier setupIconImageWithPath:iconPath];
-		[specifier setProperty:iconName
-		                forKey:@"icon"];
-		[specifier setProperty:[UIImage imageAtPath:iconPath]
-		                forKey:@"iconImage"];
-	      }
-	    [s insertObject:specifier
-		    atIndex:offset];
-	  }
-	else if ([bundleClass respondsToSelector:@selector(entryList)])
-	  {
-	    NSArray *entryList = nil;
-	    entryList = [bundleClass entryList];
-
-	    for (NSDictionary *entry in entryList)
-	      {
-		if ([entry objectForKey:@"seperate"] != nil)
-		  {
-		    /* only a new grouping */
-		    specifier = [PSSpecifier preferenceSpecifierNamed:[entry objectForKey:@"name"]
-		                                               target:nil
-		                                                  set:nil
-		                                                  get:nil
-		                                               detail:nil
-		                                                 cell:PSGROUP_CELLID
-		                                                 edit:nil];
-		    [s insertObject:specifier
-		            atIndex:offset];
-		    continue;
-		  }
-
-		specifier = [PSSpecifier preferenceSpecifierNamed:[entry objectForKey:@"name"]
-		                                           target:nil
-		                                              set:nil
-		                                              get:nil
-		                                           detail:[entry objectForKey:@"class"]
-		                                             cell:PSLINKLIST_CELLID
-		                                             edit:nil];
-
-		/* add a icon tag to each plugin */
-		NSString *iconPath = nil;
-		NSString *iconName = nil;
-
-		iconPath = [bundle pathForResource:@"icon"
-		                            ofType:@"png"];
-		iconName = @"icon.png";
-
-		if (iconPath == nil)
-		  {
-		    iconPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"pref_plugin"
-		                                                                ofType:@"png"];
-		    iconName = @"pref_plugin.png";
-		  }
-
-		if (iconPath != nil)
-		  {
-		    [specifier setupIconImageWithPath:iconPath];
-		    [specifier setProperty:iconName
-		                    forKey:@"icon"];
-		    [specifier setProperty:[UIImage imageAtPath:iconPath]
-                                    forKey:@"iconImage"];
-		  }
-
-		[s insertObject:specifier
-		        atIndex:offset];
-	      }
-	  }
-    }
-
-    /* second walk - now we disable menu items (if needed) */
-    for (NSBundle *bundle in bundleList)
-      {
-	Class bundleClass = [bundle principalClass];
-
-	if ([bundleClass respondsToSelector:@selector(disableMenuItems)])
-	  {
-	    NSArray *hideRequests = [bundleClass disableMenuItems];
-
-	    for (NSString *itemId in hideRequests)
-	      {
-		int i = 0;
-		for (; i < [s count]; i++)
-		  {
-		    if ([[[s objectAtIndex:i] propertyForKey:@"id"] isEqualToString:itemId])
-		      {
-			[s removeObjectAtIndex:i];
-			i = [s count] + 1;
-			break;
-		      }
-		  }
-	      }
-	  }
-      }
-    return s;
-}
-
 @end
-#endif
 
 @implementation ZSRelaySettings
 
@@ -285,111 +87,29 @@ typedef struct {
 
     self = [super initForContentSize:size];
     _zsIPC = ZSInitMessaging();
-    _cachedSpecifiers = nil;
-
-#if IPHONE_OS_RELEASE >= 2
-    glob_t bundles;
-    _pluginsTotal  = 0;
-    _pluginBundles = [[NSMutableArray alloc] initWithCapacity:10];
-
-    if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) == 0)
-      {
-	NSLog(@"path_c: %d", bundles.gl_pathc);
-	int i = 0;
-
-	for (; i < bundles.gl_pathc; i++)
-	  {
-	    NSBundle *bundle = nil;
-	    NSError  *error  = nil;
-	    NSString *path = [NSString stringWithCString:bundles.gl_pathv[i]
-	                                        encoding:NSASCIIStringEncoding];
-
-	    NSLog(@"loading bundle: %@", path);
-	    bundle = [[[NSBundle alloc] initWithPath:path] autorelease];
-//	    bundle = [NSBundle bundleWithPath:path];
-
-	    if ([bundle loadAndReturnError:&error] == NO)
-	      {
-		NSLog(@"failed to load bundle %@", path);
-		if (error != nil)
-		  {
-		    NSLog(@".. error was: %@", [error localizedDescription]);
-		    NSLog(@"..          : %@", [error localizedFailureReason]);
-		    [error release];
-		  }
-		continue;
-	      }
-
-	    if ([bundle principalClass])
-	      {
-		NSLog(@".. pricipalClass: %@", [bundle principalClass]);
-		[_pluginBundles addObject:bundle];
-		_pluginsTotal++;
-	      }
-	    else
-	      NSLog(@".. bundle defines no principalClass!?");
-	  }
-
-	globfree(&bundles);
-      }
-
-    if (glob(PREFS_BUNDLE_DISABLED_PATH, 0, NULL, &bundles) == 0)
-      {
-	_pluginsTotal += bundles.gl_pathc;
-	globfree(&bundles);
-      }
-    NSLog(@"..  %d plugins registered", _pluginsTotal);
-#endif
+    _specifiers = nil;
 
     return self;
 }
 
 -(void)dealloc
 {
-    if (_cachedSpecifiers != nil)
-      [_cachedSpecifiers release];
-
-#if IPHONE_OS_RELEASE >= 2
-    if (_pluginBundles != nil)
-      [_pluginBundles release];
-#endif
-
     ZSDestroy(_zsIPC);
     [super dealloc];
 }
 
 -(NSArray*)specifiers
 {
-    if (_cachedSpecifiers != nil)
-      return _cachedSpecifiers;
+    if (_specifiers != nil)
+      return _specifiers;
 
     NSMutableArray *s = [self loadSpecifiersFromPlistName:@"ZSRelay"
                                                    target:self];
     s = [NSMutableArray arrayWithArray:[self localizedSpecifiersForSpecifiers:s]];
 
-#if IPHONE_OS_RELEASE >= 2
-    s = [self updateSpecifiers:s
-		   withBundles:_pluginBundles];
-
-    if (_pluginsTotal > 0)
-      {
-	/* we have bundles - we need to control them a little */
-	PSSpecifier *specifier = nil;
-	specifier = [PSSpecifier preferenceSpecifierNamed:@"Plugins"
-	                                           target:nil
-	                                              set:nil
-	                                              get:nil
-	                                           detail:[PluginsController class]
-	                                             cell:PSLINKLIST_CELLID
-	                                             edit:nil];
-	/* insert above the support button */
-	[s insertObject:specifier
-	        atIndex:[s count]-3];
-      }
-#endif
-    _cachedSpecifiers = (NSArray*)s;
-    [_cachedSpecifiers retain];
-    return _cachedSpecifiers;
+    _specifiers = (NSArray*)s;
+    [_specifiers retain];
+    return _specifiers;
 }
 
 -(void)triggerReConfig
@@ -432,8 +152,6 @@ typedef struct {
 
 -(void)setDaemonEnabled:(id)value specifier:(id)specifier
 {
-    FILE *child_fd = NULL;
-
     [self setPreferenceValue:value
                    specifier:specifier];
 
@@ -443,25 +161,11 @@ typedef struct {
       {
 	NSLog(@"enabling zsrelay... [%d]",
 	      notify_post("org.bitspin.zsrelay.start"));
-#if 0
-	child_fd = popen("/usr/sbin/zscmd start", "r");
-	if (child_fd != NULL)
-	  {
-	    fclose(child_fd);
-	  }
-#endif
       }
     else
       {
 	NSLog(@"disabling zsrelay... [%d]",
 	      notify_post("org.bitspin.zsrelay.stop"));
-#if 0
-	child_fd = popen("/usr/sbin/zscmd stop", "r");
-	if (child_fd != NULL)
-	  {
-	    fclose(child_fd);
-	  }
-#endif
       }
 }
 
@@ -487,17 +191,20 @@ typedef struct {
 {
     self = [super initForContentSize:size];
     _zsIPC = ZSInitMessaging();
+    _specifiers = nil;
+    _refreshTimer = nil;
 
-    [NSTimer scheduledTimerWithTimeInterval:5.0
-                                     target:self
-                                   selector:@selector(pollTrafficStats:)
-                                   userInfo:nil
-                                   repeats:YES];
     return self;
 }
 
 -(void)dealloc
 {
+    if (_refreshTimer != nil)
+      {
+	[_refreshTimer invalidate];
+	[_refreshTimer release];
+	_refreshTimer = nil;
+      }
     unlink(ZSURLStatus);
     ZSDestroy(_zsIPC);
     [super dealloc];
@@ -505,17 +212,66 @@ typedef struct {
 
 -(NSArray*)specifiers
 {
+    if (_specifiers != nil)
+      return _specifiers;
+
     NSArray *s = [self loadSpecifiersFromPlistName:@"advanced"
                                             target:self];
 
-    s = [self localizedSpecifiersForSpecifiers:s];
-    return s;
+    _specifiers = [[self localizedSpecifiersForSpecifiers:s] retain];
+    return _specifiers;
+}
+
+-(void)viewDidAppear:(BOOL)animated
+{
+    NSLog(@"viewDidAppear");
+
+    if (_refreshTimer == nil)
+      {
+	NSLog(@"start refreshTimer");
+	_refreshTimer = [NSTimer scheduledTimerWithTimeInterval:5.0
+	                                                 target:self
+	                                               selector:@selector(pollTrafficStats:)
+	                                               userInfo:nil
+	                                                repeats:YES];
+	[_refreshTimer retain];
+      }
+}
+
+-(void)viewDidDisappear:(BOOL)animated
+{
+    NSLog(@"viewDidDisappear");
+    if (_refreshTimer != nil)
+      {
+	NSLog(@"stop refreshTimer");
+	[_refreshTimer invalidate];
+	[_refreshTimer release];
+	_refreshTimer = nil;
+      }
+}
+
+-(void)viewDidBecomeVisible
+{
+    /* iOS < 4 will get here */
+    if (_refreshTimer == nil)
+      {
+	NSLog(@"viewDidBecomeVisible [legacy]");
+	[self viewDidAppear:NO];
+      }
+}
+
+-(void)suspend
+{
+    /* iOS < 4 will get here */
+    if (_refreshTimer != nil)
+      {
+	NSLog(@"suspend [legacy]");
+	[self viewDidDisappear:NO];
+      }
 }
 
 -(void)triggerReConfig
 {
-    FILE *child_fd = NULL;
-
     NSLog(@"triggerReConfig");
     ZSSendCommand(_zsIPC, ZSMsgDoReConfig);
 }
@@ -584,128 +340,4 @@ typedef struct {
       */
 }
 @end
-
-#if IPHONE_OS_RELEASE >= 2
-@implementation PluginsController
-
--(id)initForContentSize:(struct CGSize)size 
-{
-    self = [super initForContentSize:size];
-    return self;
-}
-
--(void)dealloc
-{
-    [super dealloc];
-}
-
--(NSArray*)specifiers
-{
-    NSMutableArray *s = [self loadSpecifiersFromPlistName:@"plugins"
-                                                   target:self];
-    s = [NSMutableArray arrayWithArray:[self localizedSpecifiersForSpecifiers:s]];
-
-    int i = 0;
-    glob_t bundles;
-
-    for (i = 0; i < 2; i++)
-      {
-	if (i == 0)
-	  {
-	    if (glob(PREFS_BUNDLE_PATH, 0, NULL, &bundles) != 0)
-	      continue;
-	  }
-	else
-	  {
-	    if (glob(PREFS_BUNDLE_DISABLED_PATH, 0, NULL, &bundles) != 0)
-	      continue;
-	  }
-
-	NSLog(@"path_c: %d", bundles.gl_pathc);
-	int j = 0;
-
-	for (; j < bundles.gl_pathc; j++)
-	  {
-	    PSSpecifier *specifier = nil;
-
-	    NSString *bundleName = nil;
-	    NSString *path = [NSString stringWithCString:bundles.gl_pathv[j]
-	                                        encoding:NSASCIIStringEncoding];
-
-
-	    bundleName = [path lastPathComponent];
-	    bundleName = [bundleName stringByReplacingOccurrencesOfString:[bundleName pathExtension]
-	                                                       withString:@""];
-
-	    specifier = [PSSpecifier preferenceSpecifierNamed:bundleName
-	                                               target:self
-	                                                  set:@selector(setPrefVal:specifier:)
-	                                                  get:@selector(getPrefVal:)
-	                                               detail:nil
-	                                                 cell:PSSWITCH_CELLID
-	                                                 edit:nil];
-
-	    [specifier setProperty:path
-	                    forKey:@"XBundleName"];
-
-	    [s insertObject:specifier
-	            atIndex:[s count] - 2];
-	  }
-
-	globfree(&bundles);
-    }
-
-    return s;
-}
--(id)getPrefVal:(id)specifier
-{
-    NSString *extension = nil;
-    PSSpecifier *sp = (PSSpecifier*)specifier;
-
-    extension = [sp propertyForKey:@"XBundleName"];
-
-    if (extension == nil)
-      return [NSNumber numberWithBool:NO];
-
-    if ([[extension pathExtension] isEqualToString:@"bundle_disabled"])
-      return [NSNumber numberWithBool:NO];
-
-    return [NSNumber numberWithBool:YES];
-}
-
--(void)setPrefVal:(id)value specifier:(id)specifier
-{
-   NSString *extension = nil;
-   PSSpecifier *sp = (PSSpecifier*)specifier;
-
-    extension = [sp propertyForKey:@"XBundleName"];
-
-    if (extension == nil)
-      {
-	NSLog(@"extension == nil");
-	return;
-      }
-
-    if ([[extension pathExtension] isEqualToString:@"bundle_disabled"]
-	&& [(NSNumber*)value isEqualToNumber:[NSNumber numberWithBool:YES]])
-      {
-	rename([extension cStringUsingEncoding:NSASCIIStringEncoding],
-	       [[extension stringByReplacingOccurrencesOfString:@"_disabled"
-	                                            withString:@""]
-	                   cStringUsingEncoding:NSASCIIStringEncoding]);
-	perror("rename");
-      }
-
-    if ([[extension pathExtension] isEqualToString:@"bundle"]
-	&& [(NSNumber*)value isEqualToNumber:[NSNumber numberWithBool:NO]])
-      {
-	rename([extension cStringUsingEncoding:NSASCIIStringEncoding],
-	       [[extension stringByAppendingString:@"_disabled"]
-	                   cStringUsingEncoding:NSASCIIStringEncoding]);
-	perror("rename");
-      }
-}
-
-@end
-#endif
 
