@@ -24,105 +24,88 @@
 #import "ZSRelayApp.h"
 #include <sched.h>
 
-void
-iphone_app_check_connection(void)
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    NSLog(@"iphone_app_check_connection..");
-    if ([ZSRelayApp sharedApp] != nil)
-      {
-	if ([[NetworkController sharedInstance] isEdgeUp] == NO)
-	  {
-	    NSLog(@"bringing EDGE up");
-
-	    [[ZSRelayApp sharedApp] synchronousConnectionKeepAlive];
-	    NSLog(@"EDGE should be up");
-	  }
-	else
-	  NSLog(@"EDGE _is_ up");
-      }
-    else
-      NSLog(@"sharedApp == nil!");
-    [pool release];
-}
-
-/* my adaption of 'Insomnia'
- * Thanks go out to indiekiduk@gmail.com for discovering the great "feature"
- */
-
-void
-powerCallback(void *refCon, io_service_t service, natural_t type, void *argument)
-{	
-    [(ZSRelayApp*)refCon handlePMMessage:type
-                            withArgument:argument];
-}
-
-
 @implementation ZSRelayApp (IOKit)
 
+/* replacement code for 'old' Insomnia method.
+ * IOCancelPowerChange had the potential to cause random reboots on iOS >= 4.
+ * This method seems to be the safer version anyway..
+ */
 -(BOOL)setNetworkKeepAlive:(BOOL)isActive
 {
-    static IONotificationPortRef notificationPort = NULL;
-
-    if (isActive == YES && notificationPort == NULL)
+    if (isActive == YES)
       {
-	root_port = IORegisterForSystemPower(self, &notificationPort,
-					     powerCallback, &notifier);
+	if (_ioPMAssertion == -1)
+	  {
+	    NSLog(@"create ioPMAssertion..");
+	    if (IOPMAssertionCreate(kIOPMAssertionTypeNoIdleSleep,
+	                            kIOPMAssertionLevelOn, &_ioPMAssertion) != kIOReturnSuccess)
+	      return NO;
+	  }
 
-	// add the notification port to the application runloop
-	CFRunLoopAddSource(CFRunLoopGetCurrent(),
-			   IONotificationPortGetRunLoopSource(notificationPort),
-			   kCFRunLoopCommonModes);
-
+	if (_ioPMTimer != nil)
+	  {
+	    [_ioPMTimer invalidate];
+	    [_ioPMTimer release];
+	    _ioPMTimer =  [NSTimer scheduledTimerWithTimeInterval:5.0
+	                                                   target:self
+                                                         selector:@selector(handlePMTimer:)
+                                                         userInfo:nil
+                                                          repeats:YES];
+	    [_ioPMTimer retain];
+	  }
+	NSLog(@"IOPM active");
 	return YES;
       }
     else
       {
-	if (notificationPort == NULL)
-	  return YES;
+	if (_ioPMTimer != nil)
+	  {
+	    [_ioPMTimer invalidate];
+	    [_ioPMTimer release];
+	    _ioPMTimer = nil;
+	  }
 
-	CFRunLoopRemoveSource(CFRunLoopGetCurrent(),
-			      IONotificationPortGetRunLoopSource(notificationPort),
-			      kCFRunLoopCommonModes);
-	IODeregisterForSystemPower(&notifier);
-	IOServiceClose(root_port);
-	IONotificationPortDestroy(notificationPort);
-	notificationPort = NULL;
-
+	if (_ioPMAssertion != -1)
+	  {
+	    NSLog(@"removing ioPMAssertion..");
+	    if (IOPMAssertionRelease(_ioPMAssertion) != kIOReturnSuccess)
+	      return NO;
+	  }
+	NSLog(@"IOPM disabled");
 	return YES;
       }
-
     return NO;
 }
-
-- (void)handlePMMessage:(natural_t)type withArgument:(void *) argument
+-(void)handlePMTimer:(NSTimer*)theTimer
 {
-    static int messagesSoFar = 0;
+    static uint32_t ticks = 0;
 
-    switch (type)
+    theTimer = theTimer; // prevent unused
+    NSLog(@"ioPMTimer fired");
+
+    /* the PMAssertion seems to be nullified if the user interacts
+     * with her iPhone.. to prevent this, refresh it every 5sec
+     */
+    if (_ioPMAssertion != -1)
       {
-      case kIOMessageSystemWillSleep:
-      case kIOMessageSystemWillNotSleep:
-	IOAllowPowerChange(root_port, (long)argument);
-	break;
-
-      case kIOMessageCanSystemSleep:
-	IOCancelPowerChange(root_port, (long)argument);
-	break; 
-
-      case kIOMessageSystemHasPoweredOn:
-	break;
+	if (IOPMAssertionRelease(_ioPMAssertion) != kIOReturnSuccess)
+	  {
+	    NSLog(@"IOPM: failed to release assertion");
+	    return;
+	  }
+	_ioPMAssertion = -1;
+	if (IOPMAssertionCreate(kIOPMAssertionTypeNoIdleSleep,
+				kIOPMAssertionLevelOn, &_ioPMAssertion) != kIOReturnSuccess)
+	  {
+	    NSLog(@"IOPM: failed to renew assertion");
+	    return;
+	  }
       }
 
-    messagesSoFar++;
-    NSLog(@"handlePMMessage: messagesSoFar: %d", messagesSoFar);
-
-    if (messagesSoFar == 120) /* one message each 5 seconds */
+    if (ticks % 120 == 0) /* 120 * 5sec */
       {
-	NSLog(@"handlePMMessage: sending connectionKeepAlive", messagesSoFar);
-	[self connectionKeepAlive];
-	messagesSoFar = 0;
+	iphone_app_check_connection();
+	ticks = 0;
       }
 }
 
@@ -131,8 +114,8 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
     NSURL *aURL = nil;
     NSMutableURLRequest *request = nil;
     NSURLConnection *connection = nil;
-
-    if ([[NetworkController sharedInstance] isEdgeUp] == NO)
+#if IPHONE_OS_RELEASE >= 2
+    if ([self isEdgeUp] == NO)
       {
 	_connected = NO;
 	if ([self networkKeepAlive] == YES)
@@ -140,7 +123,7 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 	else
 	  [self showIcon:ZSStatusZSRelay];
       }
-
+#endif
     NSLog(@"Sending synchronous keep alive to %@", [self keepAliveURI]);
 
     aURL     = [NSURL URLWithString:[self keepAliveURI]];
@@ -187,8 +170,8 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 	NSLog(@"Ignoring keep alive - request pending");
 	return;
       }
-
-    if ([[NetworkController sharedInstance] isEdgeUp] == NO)
+#if IPHONE_OS_RELEASE >= 2
+    if ([self isEdgeUp] == NO)
       {
 	_connected = NO;
 	if ([self networkKeepAlive] == YES)
@@ -196,7 +179,7 @@ powerCallback(void *refCon, io_service_t service, natural_t type, void *argument
 	else
 	  [self showIcon:ZSStatusZSRelay];
       }
-
+#endif
     NSLog(@"Sending keep alive to %@", [self keepAliveURI]);
 
     aURL     = [NSURL URLWithString:[self keepAliveURI]];
