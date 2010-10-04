@@ -81,7 +81,9 @@ int set_sock_info __P((loginfo *, int, int));
 void relay __P((int, int));
 int log_transfer __P((loginfo *));
 
+#if IPHONE_OS_RELEASE >= 2
 extern void iphone_app_check_connection __P((void));
+#endif
 
 void
 accumulate_traffic(long *traffic_in, long *traffic_out, long *connections)
@@ -820,7 +822,9 @@ serv_loop(void)
 		releasesignal(SIGCHLD);
 		releasesignal(SIGHUP);
 #ifdef IPHONE_OS
+#if IPHONE_OS_RELEASE >= 2
 		iphone_app_check_connection();
+#endif
 #endif
 		bzero(&udp, sizeof(struct sockaddr_storage));
 		udp.ss_family = AF_UNSPEC;
@@ -859,7 +863,9 @@ serv_loop(void)
 	else
 	  {
 #ifdef IPHONE_OS
+#if IPHONE_OS_RELEASE >= 2
 	    iphone_app_check_connection();
+#endif
 #endif
 	    bzero(&udp, sizeof(struct sockaddr_storage));
 	    udp.ss_family = AF_UNSPEC;
