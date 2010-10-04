@@ -23,10 +23,9 @@
 void iphone_app_main(void);
 
 #if defined(__OBJC__)
+#if IPHONE_OS_RELEASE >= 2
 #import <IOKit/pwr_mgt/IOPMLib.h>
-#import <IOKit/IOMessage.h>
-
-#import <Message/NetworkController.h>
+#endif
 
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
@@ -42,6 +41,12 @@ extern void GSEventPlaySoundAtPath(NSString *path);
 #   undef TARGET_OS_IPHONE
 #endif
 
+#if IPHONE_OS_RELEASE >= 2
+#   define TARGET_OS_IPHONE 1
+#   import <SystemConfiguration/SCNetworkReachability.h>
+#   undef TARGET_OS_IPHONE
+#endif
+
 #include "zsipc-private.h"
 
 enum {
@@ -50,20 +55,34 @@ enum {
   ZSStatusIconMax    = 4
 };
 
+#define SBA_MessagePortName "SpringBoardAccess"
+#define SBA_AddStatusBarImage 1
+#define SBA_RemoveStatusBarImage 2
+
 @interface ZSRelayApp : NSObject <UIApplicationDelegate>
 //@interface ZSRelayApp : UIApplication
 {
+#if IPHONE_OS_RELEASE >= 2
     /* IOKit category */
-    io_connect_t root_port;
-    io_object_t  notifier;
+    IOPMAssertionID _ioPMAssertion;
+    NSTimer *_ioPMTimer;
+#endif
 
     Boolean _connected;
     NSURLConnection *_urlConnection;
 
     /* Notify category */
     ZSIPCRef _zsIPC;
-#if IPHONE_OS_RELEASE == 2
+#if IPHONE_OS_RELEASE >= 2
     SystemSoundID _connectSound;
+#endif
+#if IPHONE_OS_RELEASE >= 4
+    CFMessagePortRef _sbaMessagePort;
+#endif
+
+    /* Reachability category */
+#if IPHONE_OS_RELEASE >= 2
+    SCNetworkReachabilityRef _defaultRouteData;
 #endif
 }
 
@@ -87,8 +106,7 @@ enum {
 
 @interface ZSRelayApp (IOKit)
 -(BOOL)setNetworkKeepAlive:(BOOL)isActive;
--(void)handlePMMessage:(natural_t)type withArgument:(void *)argument;
-
+-(void)handlePMTimer:(NSTimer*)theTimer;
 -(void)connectionKeepAlive;
 -(void)synchronousConnectionKeepAlive;
 /* NSURLConnection delegate methods */
@@ -104,6 +122,9 @@ enum {
 -(void)handleNotification:(NSString*)notification;
 
 -(void)playNotification;
+#if IPHONE_OS_RELEASE >= 3
+-(BOOL)sendSBAMessage:(UInt8)message data:(UInt8*)data len:(CFIndex)len;
+#endif
 @end
 
 @interface ZSRelayApp (Icons)
@@ -111,6 +132,10 @@ enum {
 -(void)showIcon:(int)iconName makeExclusive:(BOOL)exclusive;
 -(void)removeIcon:(int)iconName;
 -(void)removeAllIcons;
+@end
+
+@interface ZSRelayApp (Reachability)
+-(BOOL)isEdgeUp;
 @end
 
 #endif

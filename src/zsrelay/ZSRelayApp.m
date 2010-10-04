@@ -32,6 +32,7 @@
 #include <fcntl.h>
 #include <sys/sysctl.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 
 static ZSRelayApp *_sharedApp = nil;
@@ -150,7 +151,13 @@ iphone_app_main (void)
     while(springboard_pid() == -1)
       sleep(4);
 
-    printf("Springboard uid: %i\n", springboard_uid());
+    struct stat stats;
+    if (stat("/tmp/zsrelay_debug.log", &stats) == 0)
+	freopen("/tmp/zsrelay_debug.log", "a", stderr);
+    else
+      freopen("/dev/null", "w", stderr); // prevent syslog spamming
+
+    fprintf(stderr, "Springboard uid: %i\n", springboard_uid());
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
@@ -199,6 +206,9 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 
     _connected = NO;
     _urlConnection = nil;
+    _ioPMAssertion = -1;
+    _ioPMTimer = nil;
+    _defaultRouteData = NULL;
 
     if ([ZSRelayApp sharedApp] == nil)
       _sharedApp = self;
@@ -221,7 +231,7 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 -(void)applicationNeedsReConfigure
 {
     _connected = NO;
-#if IPHONE_OS_RELEASE == 2
+#if IPHONE_OS_RELEASE >= 2
     _connectSound = 0;
 #endif
 
@@ -241,14 +251,14 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
     NSLog(@"use network keep alive: %d", [self networkKeepAlive]);
     if ([self networkKeepAlive] == YES)
       {
-	NSLog(@"registring io hook...");
+	NSLog(@"registring pm assertion...");
 	if ([self setNetworkKeepAlive:YES] == YES)
 	  {
-	    NSLog(@"hook registred");
+	    NSLog(@"assertion registred");
 	    [self showIcon:ZSStatusZSInsomnia];
 	  }
 	else
-	  NSLog(@"failed to register hook");
+	  NSLog(@"failed to register assertion");
       }
     if ([self sshOnLaunch] == YES)
       {
@@ -261,8 +271,8 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	  fclose(fd);
 */
       }
-
-    if ([[NetworkController sharedInstance] isEdgeUp] == YES)
+#if IPHONE_OS_RELEASE >= 2
+    if ([self isEdgeUp] == YES)
       {
 	_connected = YES;
 
@@ -271,6 +281,7 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	else
 	  [self showIcon:ZSStatusZSRelay];
       }
+#endif
 }
 
 -(void)applicationWillTerminate
@@ -291,6 +302,12 @@ iphone_app_handle_notify (CFNotificationCenterRef center, void *observer,
 	if (fd != NULL)
 	  fclose(fd);
 */
+      }
+
+    if (_defaultRouteData != NULL)
+      {
+	CFRelease(_defaultRouteData);
+	_defaultRouteData = NULL;
       }
 }
 @end
