@@ -3,7 +3,6 @@
 chown root:wheel /usr/sbin/zsrelay
 chown root:wheel /usr/sbin/zscmd
 chown root:wheel /Library/LaunchDaemons/org.bitspin.zsrelay.plist
-chown root:wheel /var/mobile/Library/StatusBridge/org.bitspin.zsrelay.icons.* || true
 
 chmod +s /usr/sbin/zsrelay
 chmod +s /usr/sbin/zscmd
