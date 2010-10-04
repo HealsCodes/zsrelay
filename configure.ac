@@ -92,11 +92,21 @@ if test x$iphoneos == xyes; then
 			AM_CONDITIONAL([IPHONE_OS_RELEASE2], [true])
 		;;
 
+		arm-apple-darwin10-*)
+			AC_SUBST(IPHONE_OS_ARCH, "iphoneos-arm")
+			AC_SUBST(IPHONE_PKG_SUFFIX)
+			AC_SUBST(IPHONE_ARCH_SUFFIX)
+			AC_DEFINE(IPHONE_OS_RELEASE, 4, [4.x iphone os])
+			AC_MSG_RESULT([iphone os 4.X])
+			AM_CONDITIONAL([IPHONE_OS_RELEASE2], [true])
+			AM_CONDITIONAL([IPHONE_OS_RELEASE4], [true])
+		;;
+
 		*)
 			AC_MSG_ERROR([
 
-Unsupported build target $host_os.
---enable-iphone-extras requires arm-apple-darwin8/9 as host or build os.])
+Unsupported build target $host_os $build_os. ($CC)
+--enable-iphone-extras requires arm-apple-darwin8/9/10 as host or build os.])
 		;;
 	esac
 
